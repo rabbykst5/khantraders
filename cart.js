@@ -227,8 +227,8 @@
     elBody().innerHTML = mini +
       '<form id="rjcForm" novalidate autocomplete="on">' +
       '<input class="rjc-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
-      fieldHTML('rjcName', 'আপনার নাম', '<input class="rjc-input" id="rjcName" name="name" type="text" autocomplete="name" placeholder="যেমন: রাকিব ইসলাম" value="' + esc(draft.name) + '">', 'নাম লিখুন') +
-      fieldHTML('rjcPhone', 'মোবাইল নম্বর', '<input class="rjc-input" id="rjcPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" value="' + esc(draft.phone) + '">', 'সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)') +
+      fieldHTML('rjcName', 'আপনার নাম', '<input class="rjc-input" id="rjcName" name="name" type="text" autocomplete="name" placeholder="যেমন: আর এস বিডি সফট " value="' + esc(draft.name) + '">', 'নাম লিখুন') +
+      fieldHTML('rjcPhone', 'মোবাইল নম্বর', '<input class="rjc-input" id="rjcPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01615450447" value="' + esc(draft.phone) + '">', 'সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (01XXXXXXXXX)') +
       fieldHTML('rjcAddress', 'ডেলিভারি ঠিকানা', '<textarea class="rjc-input" id="rjcAddress" name="address" rows="3" autocomplete="street-address" placeholder="গ্রাম/মহল্লা, থানা, জেলা">' + esc(draft.address) + '</textarea>', 'পুরো ঠিকানা লিখুন') +
       fieldHTML('rjcNote', 'নোট (ঐচ্ছিক)', '<input class="rjc-input" id="rjcNote" name="note" type="text" placeholder="কিছু জানানোর থাকলে" value="' + esc(draft.note) + '">', '') +
       '<div class="rjc-pay"><i></i><div>ক্যাশ অন ডেলিভারি<small>পণ্য হাতে পেয়ে টাকা দিন</small></div></div>' +
