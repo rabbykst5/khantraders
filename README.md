@@ -1,3 +1,2 @@
-# RS BD SOFt  
-https://rsbdsoft.com
-Mobile : 01615450447
+# khantraders
+KHAN
