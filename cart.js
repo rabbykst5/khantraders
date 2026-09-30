@@ -6,7 +6,7 @@
   /* ========= CONFIG ========= */
   const CFG = {
     TELEGRAM_PROXY_URL: 'https://khandradersbot.rabbykst5.workers.dev/',
-    HOTLINE: '09639-019016',
+    HOTLINE: '01751297055',
     MAX_QTY: 99,
     COOLDOWN_MS: 20000, // এক অর্ডারের পর পরের অর্ডারের আগে অপেক্ষা (spam ঠেকাতে)
     // Worker কী format নেয় সেটা এখানে বদলালেই হবে
