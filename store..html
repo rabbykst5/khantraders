@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RJ Network Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #030712;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Top Header */
+        header {
+            width: 100%;
+            background-color: #070b14;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+            box-sizing: border-box;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            background-color: #1d4ed8;
+            color: white;
+            padding: 5px 8px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .logo-text {
+            font-weight: bold;
+            font-size: 18px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+        .logo-sub {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        .hotline {
+            background-color: #111827;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid #374151;
+            color: #e5e7eb;
+        }
+
+        /* Main Container */
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Store Sub-header / Badge */
+        .store-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #111827;
+            border: 1px solid #374151;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-bottom: 15px;
+        }
+
+        /* Banner Section */
+        .banner {
+            margin-bottom: 25px;
+        }
+        .banner h1 {
+            font-size: 28px;
+            margin: 0 0 8px 0;
+            font-weight: bold;
+        }
+        .banner p {
+            color: #9ca3af;
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Navigation / Category & Search Bar Row */
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 15px;
+        }
+        .categories {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+        .cat-btn {
+            background-color: #111827;
+            color: #d1d5db;
+            border: 1px solid #374151;
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background-color: #1f2937;
+            color: #ffffff;
+            border-color: #4b5563;
+        }
+        .search-box {
+            background-color: #111827;
+            border: 1px solid #374151;
+            padding: 7px 14px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 13px;
+            width: 200px;
+            outline: none;
+        }
+        .search-box::placeholder {
+            color: #6b7280;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .new-tag {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: #0ea5e9;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .card img {
+            width: 100%;
+            height: 190px;
+            object-fit: contain;
+            background-color: #070b14;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #1e293b;
+        }
+        .card h3 {
+            font-size: 15px;
+            margin: 0 0 8px 0;
+            color: #f3f4f6;
+        }
+        .card-desc {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        /* Specs Tags inside Card */
+        .specs-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .spec-tag {
+            background-color: #111827;
+            border: 1px solid #374151;
+            color: #9ca3af;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Price & Stock Row */
+        .price-stock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #1e293b;
+            border-bottom: 1px solid #1e293b;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+        .price {
+            color: #38bdf8;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .stock {
+            color: #22c55e;
+            font-size: 12px;
+        }
+
+        /* Action Buttons */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-details {
+            flex: 1;
+            background-color: #111827;
+            border: 1px solid #374151;
+            color: #d1d5db;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-whatsapp {
+            flex: 1;
+            background-color: #15803d;
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-whatsapp:hover {
+            background-color: #16a34a;
+        }
+
+        /* Footer (Centered) */
+        footer {
+            width: 100%;
+            background-color: #070b14;
+            border-top: 1px solid #1f2937;
+            text-align: center;
+            padding: 25px 20px;
+            margin-top: 50px;
+            color: #9ca3af;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        footer p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">RJ</div>
+            <div>
+                <div class="logo-text">RJ NETWORK</div>
+                <div class="logo-sub">প্রযুক্তির দুনিয়ায় আপনার বিশ্বস্ত ঠিকানা।</div>
+            </div>
+        </div>
+        <div class="hotline">ফোন: 09639-019016</div>
+    </header>
+
+    <div class="wrapper">
+        
+        <!-- Store Sub-header Badge -->
+        <div class="store-badge">
+            <span>⚡</span> RJ NETWORK STORE
+        </div>
+
+        <!-- Banner -->
+        <div class="banner">
+            <h1>WiFi ও Networking পণ্য</h1>
+            <p>Router, ONU, LAN Cable, RJ45 Connector, Power Adapter & Fiber Networking-এর প্রয়োজনীয় পণ্য এক ছাদের নিচে।</p>
+        </div>
+
+        <!-- Navigation & Search Row -->
+        <div class="nav-row">
+            <div class="categories">
+                <button class="cat-btn active">সব পণ্য</button>
+                <button class="cat-btn">রাউটার</button>
+                <button class="cat-btn">ONU/ONT</button>
+                <button class="cat-btn">LAN কেবল</button>
+                <button class="cat-btn">RJ45</button>
+                <button class="cat-btn">অ্যাডাপ্টার</button>
+                <button class="cat-btn">ফাইবার</button>
+            </div>
+            <input type="text" class="search-box" placeholder="সার्च করুন...">
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid">
+            
+            <!-- Product 1 -->
+            <div class="card">
+                <div class="new-tag">NEW</div>
+                <img src="https://via.placeholder.com/300x190" alt="Router">
+                <h3>Ruijie RG-EW1200 1200M Dual Band WiFi Router</h3>
+                <div class="card-desc">ফাস্ট ও স্টেবল ডুয়াল ব্যান্ড ওয়াইফাই রাউটার। বাসা ও ছোট অফিসের জন্য সেরা এবং ওয়ারেণ্টি সুবিধা।</div>
+                <div class="specs-row">
+                    <span class="spec-tag">Model: RG-EW1200</span>
+                    <span class="spec-tag">Frequency: 2.4GHz, 5GHz</span>
+                    <span class="spec-tag">4 Antennas</span>
+                </div>
+                <div class="price-stock">
+                    <div class="price">৳ 3,050</div>
+                    <div class="stock">● স্টকে আছে</div>
+                </div>
+                <div class="card-actions">
+                    <a href="#" class="btn-details">বিস্তারিত</a>
+                    <a href="https://wa.me/88017XXXXXXXX?text=Assalamu%20Alaikum,%20ami%20ei%20product%20ti%20kinte%20chai:%20Ruijie%20RG-EW1200%20-%203050%20Tk" class="btn-whatsapp" target="_blank">WhatsApp</a>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="card">
+                <div class="new-tag">NEW</div>
+                <img src="https://via.placeholder.com/300x190" alt="Router">
+                <h3>Ruijie RG-EW300N 300 Mbps Wi-Fi 4 Wireless Smart Router</h3>
+                <div class="card-desc">বাজেট-ফ্রেন্ডলি ডুয়াল ব্যান্ড ওয়াইফাই রাউটার। ভালো কাভারেজ এবং স্মুথ পারফরম্যান্স।</div>
+                <div class="specs-row">
+                    <span class="spec-tag">Single Band</span>
+                    <span class="spec-tag">High Coverage</span>
+                </div>
+                <div class="price-stock">
+                    <div class="price">৳ 1,800</div>
+                    <div class="stock">● স্টকে আছে</div>
+                </div>
+                <div class="card-actions">
+                    <a href="#" class="btn-details">বিস্তারিত</a>
+                    <a href="https://wa.me/88017XXXXXXXX?text=Assalamu%20Alaikum,%20ami%20ei%20product%20ti%20kinte%20chai:%20Ruijie%20RG-EW300N%20-%201800%20Tk" class="btn-whatsapp" target="_blank">WhatsApp</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Centered Footer -->
+    <footer>
+        <p><strong>RJ NETWORK</strong></p>
+        <p>কারিগরি-বাণিজ্যিক কেন্দ্র, ঝাউড়িয়া, কুষ্টিয়া</p>
+        <p>হটলাইন: 09639-019016</p>
+        <p style="font-size: 11px; color: #4b5563; margin-top: 8px;">© 2026 RJ NETWORK - All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
