@@ -313,7 +313,7 @@
     const d = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-    return 'RJ' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + rand;
+    return 'RS' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + rand;
   }
 
   function buildMessage(o) {
