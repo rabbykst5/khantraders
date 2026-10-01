@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#06111f">
-  <meta name="description" content="Khan Traders — অর্ডার ট্র্যাকিং">
+  <meta name="description" content="Khan Traders — স্মার্ট অর্ডার ট্র্যাকিং">
   <title>অর্ডার ট্র্যাকিং — Khan Traders</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +40,7 @@
       border-color:rgba(34,211,238,.65);
       box-shadow:0 0 0 3px rgba(34,211,238,.1);
     }
-    .step-item{position:relative;display:flex;gap:16px;padding-bottom:28px}
+    .step-item{position:relative;display:flex;gap:16px;padding-bottom:24px}
     .step-item:last-child{padding-bottom:0}
     .step-line{position:absolute;left:15px;top:32px;bottom:0;width:2px;background:rgba(148,163,184,.2)}
     .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;z-index:2;flex-shrink:0}
@@ -66,67 +66,33 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-10">
+  <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-8">
     <div class="glass rounded-3xl p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-6">
         <div class="text-4xl mb-2">🔍</div>
-        <h1 class="text-2xl font-black">আপনার অর্ডারের অবস্থা জানুন</h1>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">অর্ডার নিশ্চিতকরণে পাওয়া আইডি (যেমন: KT261002-XXXX) দিন</p>
+        <h1 class="text-2xl font-black">অর্ডার ট্র্যাকিং</h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">আপনার **মোবাইল নম্বর** অথবা **অর্ডার আইডি** দিয়ে সার্চ করুন</p>
       </div>
 
       <!-- Search Box -->
       <form id="trackForm" class="flex gap-2">
         <input 
-          id="orderIdInput" 
+          id="queryInput" 
           type="text" 
-          placeholder="যেমন: KT261002-ABCD" 
+          placeholder="মোবাইল নম্বর (017...) বা অর্ডার আইডি" 
           required 
-          class="track-input flex-1 glass rounded-2xl px-4 py-3.5 text-sm uppercase font-bold tracking-wider text-slate-100 placeholder:normal-case placeholder:font-normal placeholder:text-slate-500"
+          class="track-input flex-1 glass rounded-2xl px-4 py-3.5 text-sm font-bold text-slate-100 placeholder:font-normal placeholder:text-slate-500"
         >
         <button type="submit" id="searchBtn" class="px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm transition flex-shrink-0">
           খুঁজুন
         </button>
       </form>
 
-      <!-- Error / Alert Box -->
+      <!-- Alert Message Box -->
       <div id="statusAlert" class="hidden mt-4 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm text-center"></div>
 
-      <!-- Order Result Box -->
-      <div id="resultBox" class="hidden mt-8 pt-8 border-t border-cyan-400/10">
-        
-        <!-- Header Info -->
-        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-800">
-          <div>
-            <div class="text-xs text-slate-500">গ্রাহকের নাম ও অর্ডার নম্বর</div>
-            <div id="resCustomerName" class="font-bold text-slate-200 text-sm"></div>
-            <div id="resOrderId" class="font-black text-cyan-300 text-base mt-0.5"></div>
-          </div>
-          <div class="text-right">
-            <div class="text-xs text-slate-500">পরিশোধযোগ্য বিল</div>
-            <div id="resTotal" class="font-black text-emerald-400 text-lg"></div>
-          </div>
-        </div>
-
-        <!-- Payment Info Card (নতুন যুক্ত করা হয়েছে) -->
-        <div class="mb-6 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="text-slate-400">পেমেন্ট মেথড:</span>
-            <span id="resPayMethod" class="font-bold px-2.5 py-1 rounded-lg bg-cyan-400/10 text-cyan-300 border border-cyan-400/20"></span>
-          </div>
-          <div id="resTrxContainer" class="hidden flex items-center gap-2">
-            <span class="text-slate-400">TrxID:</span>
-            <span id="resTrxId" class="font-mono font-bold px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-400 border border-pink-500/20"></span>
-          </div>
-        </div>
-
-        <!-- Stepper Visualizer -->
-        <div id="stepperContainer"></div>
-
-        <div class="mt-8 p-4 rounded-2xl bg-cyan-400/5 border border-cyan-300/10 text-xs text-slate-400 text-center leading-6">
-          জরুরি প্রয়োজনে হটলাইনে যোগাযোগ করুন: <br>
-          📞 <a href="tel:01751297055" class="text-cyan-300 font-bold">01751297055</a>
-        </div>
-      </div>
+      <!-- Result Container -->
+      <div id="ordersContainer" class="mt-8 space-y-5"></div>
     </div>
   </main>
 
@@ -134,21 +100,28 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9Y5Dp1VSBPc4FAlxuQ9vXyuY_dC9-XYRubqTRrLUpb7SWiGhwkxwfYct4_3hvLyHS/exec";
 
     const form = document.getElementById('trackForm');
-    const input = document.getElementById('orderIdInput');
+    const input = document.getElementById('queryInput');
     const alertBox = document.getElementById('statusAlert');
-    const resultBox = document.getElementById('resultBox');
+    const ordersContainer = document.getElementById('ordersContainer');
     const btn = document.getElementById('searchBtn');
 
     const STEPS = [
       { id: 1, title: 'অর্ডার পেন্ডিং', desc: 'অর্ডারটি সিস্টেমে গৃহীত হয়েছে' },
-      { id: 2, title: 'অর্ডার কনফার্মড', desc: 'প্রতিনিধি ফোনে কথা বলে অর্ডার নিশ্চিত করেছেন' },
-      { id: 3, title: 'প্যাকেজিং ও ডিসপ্যাচ', desc: 'পণ্য প্যাকেট করে কুরিয়ারে হস্তান্তর করা হয়েছে' },
+      { id: 2, title: 'অর্ডার কনফার্মড', desc: 'প্রতিনিধি ফোনে কথা বলে নিশ্চিত করেছেন' },
+      { id: 3, title: 'প্যাকেজিং ও ডিসপ্যাচ', desc: 'পণ্য কুরিয়ারে হস্তান্তর করা হয়েছে' },
       { id: 4, title: 'ডেলিভারি সম্পন্ন', desc: 'পণ্য আপনার ঠিকানায় পৌঁছে দেওয়া হয়েছে' }
     ];
 
-    function renderStepper(currentStep) {
-      const container = document.getElementById('stepperContainer');
-      container.innerHTML = STEPS.map((step, idx) => {
+    function getStepNumber(status) {
+      const st = String(status || '').toLowerCase();
+      if (st.includes('ডেলিভার্ড') || st.includes('সম্পন্ন') || st.includes('delivered')) return 4;
+      if (st.includes('ডিসপ্যাচ') || st.includes('প্যাকিং') || st.includes('dispatch') || st.includes('courier')) return 3;
+      if (st.includes('কনফার্ম') || st.includes('confirmed')) return 2;
+      return 1;
+    }
+
+    function renderStepperHTML(currentStep) {
+      return STEPS.map((step, idx) => {
         let status = 'pending';
         let icon = step.id;
 
@@ -166,70 +139,114 @@
             ${!isLast ? '<div class="step-line"></div>' : ''}
             <div class="step-dot">${icon}</div>
             <div>
-              <div class="text-sm font-bold ${status === 'active' ? 'text-cyan-300' : (status === 'done' ? 'text-emerald-400' : 'text-slate-500')}">${step.title}</div>
-              <div class="text-xs text-slate-400 mt-0.5">${step.desc}</div>
+              <div class="text-xs sm:text-sm font-bold ${status === 'active' ? 'text-cyan-300' : (status === 'done' ? 'text-emerald-400' : 'text-slate-500')}">${step.title}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${step.desc}</div>
             </div>
           </div>
         `;
       }).join('');
     }
 
+    function renderOrderCard(order, isFirstRunning) {
+      const stepNum = getStepNumber(order.status);
+      const isCompleted = stepNum === 4;
+      const isMFS = order.payMethod && (order.payMethod.includes('বিকাশ') || order.payMethod.includes('নগদ') || order.payMethod.includes('mfs'));
+
+      // কুরিয়ার বাটন লজিক
+      let courierHTML = '';
+      if (order.courierCode && order.courierCode.trim() !== '') {
+        const code = order.courierCode.trim();
+        const isRedx = code.toUpperCase().startsWith('REDX');
+        const link = isRedx 
+          ? `https://redx.com.bd/track-order?trackingId=${encodeURIComponent(code)}`
+          : `https://steadfast.com.bd/t/${encodeURIComponent(code)}`;
+        const label = isRedx ? 'RedX ট্র্যাক ↗' : 'Steadfast ট্র্যাক ↗';
+        const btnClass = isRedx ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950';
+
+        courierHTML = `
+          <div class="mt-4 p-3 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/20 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div>
+              <span class="text-emerald-400 font-semibold">কুরিয়ার কোড:</span> 
+              <b class="font-mono text-white tracking-wider ml-1">${code}</b>
+            </div>
+            <a href="${link}" target="_blank" class="px-3 py-1.5 rounded-xl font-bold transition ${btnClass}">
+              ${label}
+            </a>
+          </div>
+        `;
+      }
+
+      // কমপ্লিট অর্ডারের জন্য: কোনো ড্রপডাউন বা স্টেপার মেনু থাকবে না
+      if (isCompleted) {
+        return `
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-emerald-500/25 flex items-center justify-between opacity-80 cursor-default">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-300 text-sm">${order.orderId}</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">✓ ডেলিভারি সম্পন্ন</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">${order.item || ''} · ৳ ${Number(order.total || 0).toLocaleString('en-BD')}</div>
+            </div>
+            <div class="text-xs text-slate-500 font-mono">আর্কাইভড</div>
+          </div>
+        `;
+      }
+
+      // রানিং অর্ডারের জন্য: সম্পূর্ণ ট্র্যাকিং প্যানেল ও কুরিয়ার অপশন সরাসরি দৃশ্যমান থাকবে
+      return `
+        <div class="p-5 sm:p-6 rounded-3xl bg-[#071526]/90 border border-cyan-400/30 shadow-lg">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-cyan-400/15">
+            <div>
+              <div class="text-xs text-slate-400">অর্ডার নম্বর:</div>
+              <div class="font-black text-cyan-300 text-base mt-0.5">${order.orderId}</div>
+              <div class="text-xs text-slate-300 mt-0.5 font-semibold">${order.name}</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-black bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 mb-1">
+                ${order.status || 'পেন্ডিং'}
+              </span>
+              <div class="font-black text-emerald-400 text-base">৳ ${Number(order.total || 0).toLocaleString('en-BD')}</div>
+            </div>
+          </div>
+
+          <!-- পেমেন্ট ট্যাগ -->
+          <div class="mb-4 p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs">
+            <span class="text-slate-400">পেমেন্ট: <b class="${isMFS ? 'text-pink-400' : 'text-cyan-300'}">${isMFS ? 'বিকাশ / নগদ' : (order.payMethod || 'ক্যাশ অন ডেলিভারি')}</b></span>
+            ${order.trxId && order.trxId !== 'N/A' ? `<span class="font-mono text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20 text-[11px]">Trx: ${order.trxId}</span>` : ''}
+          </div>
+
+          <!-- কুরিয়ার অপশন -->
+          ${courierHTML}
+
+          <!-- লাইভ স্টেপার -->
+          <div class="mt-6 pt-4 border-t border-slate-800">
+            ${renderStepperHTML(stepNum)}
+          </div>
+        </div>
+      `;
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const orderId = input.value.trim().toUpperCase();
+      const query = input.value.trim();
       alertBox.classList.add('hidden');
-      resultBox.classList.add('hidden');
+      ordersContainer.innerHTML = '';
 
       btn.textContent = 'খোঁজা হচ্ছে...';
       btn.disabled = true;
 
       try {
-        const response = await fetch(`${SCRIPT_URL}?id=${encodeURIComponent(orderId)}`);
+        const response = await fetch(`${SCRIPT_URL}?id=${encodeURIComponent(query)}`);
         const data = await response.json();
 
-        if (data && data.found) {
-          document.getElementById('resCustomerName').textContent = data.name || 'গ্রাহক';
-          document.getElementById('resOrderId').textContent = data.orderId;
-          document.getElementById('resTotal').textContent = data.total ? ('৳ ' + Number(data.total).toLocaleString('en-BD')) : '৳ ০';
-
-          // পেমেন্ট মেথড ও TrxID প্রদর্শন লজিক
-          const payMethodEl = document.getElementById('resPayMethod');
-          const trxContainer = document.getElementById('resTrxContainer');
-          const trxIdEl = document.getElementById('resTrxId');
-
-          const isMFS = data.payMethod && (data.payMethod.includes('বিকাশ') || data.payMethod.includes('নগদ') || data.payMethod.includes('mfs'));
-          payMethodEl.textContent = isMFS ? 'বিকাশ / নগদ' : (data.payMethod || 'ক্যাশ অন ডেলিভারি');
-
-          if (isMFS) {
-            payMethodEl.className = 'font-bold px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20';
-          } else {
-            payMethodEl.className = 'font-bold px-2.5 py-1 rounded-lg bg-cyan-400/10 text-cyan-300 border border-cyan-400/20';
-          }
-
-          if (data.trxId && data.trxId !== 'N/A' && data.trxId.trim() !== '') {
-            trxIdEl.textContent = data.trxId;
-            trxContainer.classList.remove('hidden');
-          } else {
-            trxContainer.classList.add('hidden');
-          }
-
-          // স্ট্যাটাস নির্ধারণ
-          let stepNumber = 1;
-          const st = String(data.status || '').toLowerCase();
-          
-          if (st.includes('কনফার্ম') || st.includes('confirmed')) stepNumber = 2;
-          else if (st.includes('ডিসপ্যাচ') || st.includes('প্যাকিং') || st.includes('dispatch') || st.includes('courier')) stepNumber = 3;
-          else if (st.includes('ডেলিভার্ড') || st.includes('সম্পন্ন') || st.includes('delivered')) stepNumber = 4;
-          else stepNumber = 1;
-
-          renderStepper(stepNumber);
-          resultBox.classList.remove('hidden');
+        if (data && data.found && data.orders && data.orders.length > 0) {
+          ordersContainer.innerHTML = data.orders.map(order => renderOrderCard(order)).join('');
         } else {
-          alertBox.textContent = 'পণ্যটির কোনো তথ্য পাওয়া যায়নি। অনুগ্রহ করে সঠিক অর্ডার আইডি দিন।';
+          alertBox.textContent = 'এই নম্বর বা আইডিতে কোনো অর্ডারের তথ্য পাওয়া যায়নি।';
           alertBox.classList.remove('hidden');
         }
       } catch (error) {
-        alertBox.textContent = 'গুগল শিট সার্ভারের সাথে সংযোগে সমস্যা হচ্ছে। ইন্টারনেট চেক করে আবার চেষ্টা করুন।';
+        alertBox.textContent = 'সার্ভার সংযোগে সমস্যা হচ্ছে। ইন্টারনেট চেক করে আবার চেষ্টা করুন।';
         alertBox.classList.remove('hidden');
       } finally {
         btn.textContent = 'খুঁজুন';
@@ -237,11 +254,11 @@
       }
     });
 
-    // URL কোয়েরি প্যারামিটার চেক (track.html?id=KT...)
+    // URL প্যারামিটার হ্যান্ডলার (track.html?id=KT... অথবা phone=017...)
     const urlParams = new URLSearchParams(window.location.search);
-    const prefillId = urlParams.get('id');
-    if (prefillId) {
-      input.value = prefillId;
+    const prefill = urlParams.get('id') || urlParams.get('phone');
+    if (prefill) {
+      input.value = prefill;
       form.dispatchEvent(new Event('submit'));
     }
   </script>
