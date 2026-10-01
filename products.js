@@ -46,8 +46,7 @@ const PRODUCTS = [
     ],
     images: [
       "products/biscuit/tiffin_time.jpg",
-      "products/biscuit/milk2.jpg",
-      "products/biscuit/milk3.jpg"
+      
     ]
   },
 
