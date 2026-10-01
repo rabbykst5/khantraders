@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#030914">
-  <meta name="description" content="Khan Traders index — Product Details">
+  <meta name="description" content="Khan Traders — Product Details">
   <title>Product Details — Khan Traders</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -89,16 +89,15 @@
 </head>
 
 <body>
-
   <!-- Header -->
   <header class="sticky top-0 z-50 border-b border-cyan-400/10 bg-[#030914]/85 backdrop-blur-xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
       <div class="flex items-center justify-between gap-4">
         <a href="index.html" class="flex items-center gap-3 min-w-0">
-        <img src="logo.png" alt="Khan Traders Logo" class="site-logo w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0 rounded-xl">
-        <div class="min-w-0">
-            <div class="font-black tracking-wide text-lg sm:text-xl truncate">Khan Traders | index</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 truncate">কানেক্ট থাকুন সেরা ডিভাইসে।</div>
+          <img src="logo.jpg" alt="Khan Traders Logo" class="site-logo w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0 rounded-xl" onerror="this.style.display='none'">
+          <div class="min-w-0">
+            <div class="font-black tracking-wide text-lg sm:text-xl truncate">Khan Traders</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 truncate">বিশ্বাস, স্বাদ ও গুণমান।</div>
           </div>
         </a>
 
@@ -115,7 +114,6 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 mb-6">
       <a href="index.html" class="hover:text-cyan-300">হোম</a>
@@ -127,7 +125,6 @@
 
     <!-- Product -->
     <section id="productSection" class="grid lg:grid-cols-2 gap-7 lg:gap-10">
-
       <!-- Gallery -->
       <div class="glass rounded-3xl p-3 sm:p-4 fade-in">
         <div class="gallery-main rounded-2xl overflow-hidden relative">
@@ -147,16 +144,18 @@
       <div class="flex flex-col fade-in">
         <div class="flex flex-wrap items-center gap-2 mb-3">
           <span id="categoryBadge" class="px-2.5 py-1 rounded-lg bg-cyan-400/10 border border-cyan-300/20 text-cyan-300 text-xs font-bold"></span>
-          <span id="testBadge" class="px-2.5 py-1 rounded-lg bg-cyan-400 text-slate-950 text-[10px] font-black"></span>
+          <span id="testBadge" class="hidden px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase"></span>
         </div>
 
         <h1 id="productName" class="text-2xl sm:text-4xl font-black leading-tight"></h1>
-
         <p id="productDescription" class="text-slate-400 leading-7 mt-4 text-sm sm:text-base"></p>
 
         <div class="mt-6 glass rounded-2xl p-5">
           <div class="text-xs text-slate-500">মূল্য</div>
-          <div class="flex flex-wrap items-end gap-2 mt-1">
+          
+          <!-- Strikethrough Old Price + Current Price Section -->
+          <div class="flex flex-wrap items-baseline gap-3 mt-1">
+            <span id="productOldPrice" class="hidden text-base sm:text-lg text-slate-400 line-through"></span>
             <span id="productPrice" class="text-3xl sm:text-4xl font-black text-cyan-300"></span>
             <span id="productUnit" class="text-sm text-slate-400 pb-1"></span>
           </div>
@@ -212,7 +211,6 @@
       </div>
       <div id="relatedGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5"></div>
     </section>
-
   </main>
 
   <footer class="border-t border-cyan-400/10 mt-10">
@@ -228,7 +226,7 @@
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
 
-    const product = Array.isArray(PRODUCTS)
+    const product = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS))
       ? PRODUCTS.find(item => item.id === productId)
       : null;
 
@@ -239,7 +237,7 @@
     let currentImage = 0;
 
     function taka(n){
-      return '৳ ' + Number(n).toLocaleString('en-BD');
+      return '৳ ' + Number(n || 0).toLocaleString('en-BD');
     }
 
     function showProduct(){
@@ -252,12 +250,39 @@
       }
 
       document.title = product.name + ' — Khan Traders';
-
       document.getElementById('breadcrumbProduct').textContent = product.name;
-      document.getElementById('categoryBadge').textContent = product.categoryName || 'Networking';
-      document.getElementById('testBadge').textContent = product.badge || 'PRODUCT';
+      document.getElementById('categoryBadge').textContent = product.categoryName || 'বিস্কুট';
+      
+      // ব্যাজের ধরন ও রঙ নিয়ন্ত্রণ
+      const testBadge = document.getElementById('testBadge');
+      if (product.badge) {
+        testBadge.classList.remove('hidden');
+        testBadge.textContent = product.badge;
+        const bText = product.badge.toUpperCase();
+        if (bText.includes('OFF') || bText.includes('ছাড়') || bText.includes('DISCOUNT')) {
+          testBadge.className = 'px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-black tracking-wider uppercase';
+        } else if (bText.includes('HOT') || bText.includes('DEAL')) {
+          testBadge.className = 'px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-[10px] font-black tracking-wider uppercase';
+        } else if (!product.stock || bText.includes('আউট')) {
+          testBadge.className = 'px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 text-[10px] font-black tracking-wider uppercase';
+        } else {
+          testBadge.className = 'px-2.5 py-1 rounded-lg bg-cyan-400 text-slate-950 text-[10px] font-black tracking-wider uppercase';
+        }
+      } else {
+        testBadge.classList.add('hidden');
+      }
+
       document.getElementById('productName').textContent = product.name;
       document.getElementById('productDescription').textContent = product.description || '';
+
+      // পুরনো দাম কেটে দেখানো
+      const oldPriceEl = document.getElementById('productOldPrice');
+      if (product.oldPrice) {
+        oldPriceEl.textContent = taka(product.oldPrice);
+        oldPriceEl.classList.remove('hidden');
+      } else {
+        oldPriceEl.classList.add('hidden');
+      }
 
       document.getElementById('productPrice').textContent = taka(product.price);
       document.getElementById('productUnit').textContent = product.unit ? '/ ' + product.unit : '';
@@ -297,14 +322,13 @@
     }
 
     function renderGallery(){
-      const images = Array.isArray(product.images) ? product.images : [];
+      const images = Array.isArray(product?.images) ? product.images : [];
       const main = document.getElementById('mainImage');
       const thumbs = document.getElementById('thumbnailGrid');
       const counter = document.getElementById('imageCounter');
 
       if(!images.length){
-        main.removeAttribute('src');
-        main.alt = product.name;
+        main.style.display = 'none';
         thumbs.innerHTML = '';
         counter.textContent = 'No Image';
         return;
@@ -312,31 +336,22 @@
 
       currentImage = Math.min(currentImage, images.length - 1);
       main.src = images[currentImage];
-      main.alt = product.name + ' — image ' + (currentImage + 1);
+      main.alt = (product?.name || '') + ' — image ' + (currentImage + 1);
 
-      main.onerror = () => {
-        main.style.display = 'none';
-      };
-      main.onload = () => {
-        main.style.display = 'block';
-      };
+      main.onerror = () => { main.style.display = 'none'; };
+      main.onload = () => { main.style.display = 'block'; };
 
       counter.textContent = (currentImage + 1) + ' / ' + images.length;
 
       thumbs.innerHTML = images.map((src, i) => `
         <button type="button" class="thumb rounded-xl ${i === currentImage ? 'active' : ''}" onclick="selectImage(${i})" aria-label="Image ${i + 1}">
-          <img src="${src}" alt="${product.name} thumbnail ${i + 1}" loading="lazy"
-               onerror="this.style.opacity='.15'">
+          <img src="${src}" alt="thumbnail ${i + 1}" loading="lazy" onerror="this.style.opacity='.15'">
         </button>
       `).join('');
-
-      document.querySelectorAll('.thumb').forEach((el, i) => {
-        el.classList.toggle('active', i === currentImage);
-      });
     }
 
     window.selectImage = function(index){
-      const images = product.images || [];
+      const images = product?.images || [];
       if(!images.length) return;
       currentImage = (index + images.length) % images.length;
       renderGallery();
@@ -358,20 +373,8 @@
       if(e.key === 'ArrowRight') selectImage(currentImage + 1);
     });
 
-    let touchStartX = 0;
-    document.getElementById('mainImage').parentElement.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, {passive:true});
-
-    document.getElementById('mainImage').parentElement.addEventListener('touchend', e => {
-      const diff = e.changedTouches[0].screenX - touchStartX;
-      if(Math.abs(diff) < 45) return;
-      if(diff < 0) selectImage(currentImage + 1);
-      else selectImage(currentImage - 1);
-    }, {passive:true});
-
     function renderRelated(){
-      if(!Array.isArray(PRODUCTS)) return;
+      if(typeof PRODUCTS === 'undefined' || !Array.isArray(PRODUCTS)) return;
 
       const related = PRODUCTS
         .filter(p => p.id !== product.id && p.category === product.category)
@@ -392,7 +395,10 @@
           <div class="p-4">
             <div class="text-[11px] text-cyan-300 font-bold">${p.categoryName}</div>
             <h3 class="font-bold mt-1 line-clamp-2">${p.name}</h3>
-            <div class="text-xl font-black text-cyan-300 mt-3">${taka(p.price)}${p.unit ? ' / ' + p.unit : ''}</div>
+            <div class="flex items-baseline gap-2 mt-3">
+              ${p.oldPrice ? `<span class="text-xs text-slate-400 line-through">${taka(p.oldPrice)}</span>` : ''}
+              <span class="text-lg font-black text-cyan-300">${taka(p.price)}${p.unit ? ' / ' + p.unit : ''}</span>
+            </div>
           </div>
         </a>
       `).join('');
