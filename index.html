@@ -4,19 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#06111f">
-  <meta name="description" content="Khan Traders — বিস্কুট ও স্ন্যাকস পণ্যসমূহ">
-  <title>Khan Traders | হোম</title>
+  <meta name="description" content="Khan Traders — Network & IT Products">
+  <title>Khan Traders | Home</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Cart logic script -->
   <script src="cart.js" defer></script>
 
   <style>
     :root{
       --bg:#030914;
-      --panel:rgba(8,22,40,.78);
-      --panel-2:rgba(10,30,53,.9);
-      --line:rgba(56,189,248,.20);
+      --panel:rgba(8,22,40,.82);
+      --panel-hover:rgba(12,32,58,.95);
+      --line:rgba(56,189,248,.22);
       --cyan:#22d3ee;
       --blue:#38bdf8;
       --violet:#8b5cf6;
@@ -29,43 +28,52 @@
       margin:0;
       color:var(--text);
       background:
-        radial-gradient(circle at 15% 10%, rgba(34,211,238,.10), transparent 28%),
-        radial-gradient(circle at 85% 15%, rgba(139,92,246,.12), transparent 30%),
+        radial-gradient(circle at 10% 10%, rgba(34,211,238,.12), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(139,92,246,.14), transparent 32%),
         var(--bg);
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Bengali",sans-serif;
     }
     .glass{
       background:var(--panel);
-      border:1px solid rgba(148,163,184,.13);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
+      border:1px solid rgba(148,163,184,.15);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      box-shadow:0 8px 32px rgba(0,0,0,.3);
     }
     .hero-glow{
       background:
-        radial-gradient(circle at 78% 45%, rgba(34,211,238,.16), transparent 22%),
-        radial-gradient(circle at 88% 70%, rgba(139,92,246,.18), transparent 24%);
+        radial-gradient(circle at 78% 45%, rgba(34,211,238,.18), transparent 25%),
+        radial-gradient(circle at 88% 70%, rgba(139,92,246,.2), transparent 28%);
+    }
+    .filter-btn{
+      transition:all .25s ease;
     }
     .filter-btn.active{
       background:linear-gradient(135deg,#0891b2,#2563eb);
-      border-color:rgba(103,232,249,.65);
-      box-shadow:0 0 24px rgba(34,211,238,.18);
+      border-color:rgba(103,232,249,.8);
+      box-shadow:0 0 25px rgba(34,211,238,.25);
     }
     .product-card{
-      transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+      transition:all .3s cubic-bezier(.4,0,.2,1);
     }
     .product-card:hover{
-      transform:translateY(-5px);
-      border-color:rgba(34,211,238,.48);
-      box-shadow:0 18px 50px rgba(0,0,0,.28),0 0 28px rgba(34,211,238,.08);
+      transform:translateY(-6px);
+      background:var(--panel-hover);
+      border-color:rgba(34,211,238,.5);
+      box-shadow:0 20px 45px rgba(0,0,0,.4),0 0 30px rgba(34,211,238,.12);
     }
     .product-image{
       aspect-ratio:4/3;
       background:
-        radial-gradient(circle at 50% 40%,rgba(34,211,238,.13),transparent 35%),
+        radial-gradient(circle at 50% 40%,rgba(34,211,238,.15),transparent 40%),
         linear-gradient(135deg,#071827,#0a2138);
     }
     .product-image img{
       width:100%;height:100%;object-fit:cover;display:block;
+      transition:transform .4s ease;
+    }
+    .product-card:hover .product-image img{
+      transform:scale(1.05);
     }
     .image-fallback{
       display:none;
@@ -82,39 +90,39 @@
     }
     .search-box:focus{
       outline:none;
-      border-color:rgba(34,211,238,.6);
-      box-shadow:0 0 0 3px rgba(34,211,238,.08);
+      border-color:rgba(34,211,238,.7);
+      box-shadow:0 0 0 4px rgba(34,211,238,.12);
     }
   </style>
 </head>
 
 <body>
   <!-- Header -->
-  <header class="sticky top-0 z-50 border-b border-cyan-400/10 bg-[#030914]/85 backdrop-blur-xl">
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3">
+  <header class="sticky top-0 z-50 border-b border-cyan-400/15 bg-[#030914]/90 backdrop-blur-2xl">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3.5">
       <div class="flex items-center justify-between gap-4">
-        <a href="index.html" class="flex items-center gap-3 min-w-0">
-          <img src="logo.jpg" alt="Khan Traders Logo" class="site-logo w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0 rounded-xl" onerror="this.style.display='none'">
+        <a href="index.html" class="flex items-center gap-3 min-w-0 group">
+          <img src="logo.jpg" alt="Khan Traders Logo" class="site-logo w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0 rounded-2xl border border-cyan-400/20 group-hover:border-cyan-400/50 transition" onerror="this.style.display='none'">
           <div class="min-w-0">
-            <div class="font-black tracking-wide text-lg sm:text-xl truncate">Khan Traders</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 truncate">বিশ্বাস, স্বাদ ও গুণমান।</div>
+            <div class="font-black tracking-wide text-lg sm:text-xl truncate text-slate-100 group-hover:text-cyan-300 transition">Khan Traders</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 truncate">বিশ্বাস, গতি ও নেটওয়ার্কিং সলিউশন।</div>
           </div>
         </a>
 
-        <!-- অ্যাকশন বাটনসমূহ (হোম, ট্র্যাক, কার্ট, ফোন) -->
-        <div class="flex items-center gap-2">
-          <a href="index.html" class="hidden sm:inline-flex px-4 py-2 rounded-xl glass text-sm font-semibold hover:border-cyan-400/40 transition">হোম</a>
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2.5">
+          <a href="index.html" class="hidden sm:inline-flex px-4 py-2 rounded-xl glass text-sm font-semibold hover:border-cyan-400/50 transition">হোম</a>
           
-          <a href="track.html" class="px-3.5 py-2 rounded-xl glass text-sm font-bold text-cyan-300 hover:border-cyan-400/40 hover:bg-cyan-400/10 transition inline-flex items-center gap-1.5">
+          <a href="track.html" class="px-3.5 py-2 rounded-xl glass text-sm font-bold text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/10 transition inline-flex items-center gap-1.5">
             <span>🔍</span><span>ট্র্যাক</span>
           </a>
 
-          <button type="button" data-cart-open aria-label="কার্ট খুলুন" class="relative px-3 py-2 rounded-xl glass text-sm font-bold hover:border-cyan-400/40 transition inline-flex items-center gap-2">
+          <button type="button" data-cart-open aria-label="কার্ট খুলুন" class="relative px-3.5 py-2 rounded-xl glass text-sm font-bold hover:border-cyan-400/50 transition inline-flex items-center gap-2">
             <span>🛒</span><span class="hidden sm:inline">কার্ট</span>
             <span data-cart-count class="rjc-badge" style="display:none">0</span>
           </button>
           
-          <a href="tel:01751297055" class="px-3 py-2 rounded-xl bg-cyan-400/10 text-cyan-300 text-sm font-bold">
+          <a href="tel:01751297055" class="px-3.5 py-2 rounded-xl bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 text-sm font-bold hover:bg-cyan-400/20 transition">
             <span class="sm:hidden">📞</span><span class="hidden sm:inline">01751297055</span>
           </a>
         </div>
@@ -124,47 +132,47 @@
 
   <main>
     <!-- Hero Banner -->
-    <section class="hero-glow border-b border-cyan-400/10">
-      <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    <section class="hero-glow border-b border-cyan-400/15 relative overflow-hidden">
+      <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16 relative z-10">
         <div class="max-w-3xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-400/10 border border-cyan-300/20 text-cyan-300 text-xs font-bold mb-4">
-            🛒 KHAN TRADERS
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-400/10 border border-cyan-300/25 text-cyan-300 text-xs font-bold mb-5 shadow-inner">
+            ⚡ KHAN TRADERS STORE
           </div>
-          <h1 class="text-3xl sm:text-5xl font-black leading-tight">আপনি শুধু একজন ব্যবসায়ী নন, Qia Qia-এর ভবিষ্যতের অংশীদার।</h1>
+          <h1 class="text-3xl sm:text-5xl font-black leading-tight tracking-tight">সেরা মানের নেটওয়ার্কিং ও আইটি ডিভাইস</h1>
           <p class="mt-4 text-slate-400 text-sm sm:text-base leading-7 max-w-2xl">
-            আমাদের লক্ষ্য—মানসম্মত ও সুস্বাদু পণ্য তৈরি করে সবার মুখে হাসি ফোটানো। আমরা তৈরি করি নানা রকম বিস্কুট ও স্ন্যাকস, যা উপযোগী সব বয়সের জন্য। বিশ্বাস, স্বাদ ও গুণমান—এই তিনে গড়া কিয়া কিয়া’র পথচলা।
+            আপনার বাসা ও অফিসের ইন্টারনেট কানেক্টিভিটিকে আরও দ্রুত ও শক্তিশালী করতে আমরা নিয়ে এসেছি প্রিমিয়াম রাউটার, ONU এবং প্রয়োজনীয় এক্সেসরিজ। আস্থায় ও মানে আমরা সেরা।
           </p>
         </div>
       </div>
     </section>
 
     <!-- Controls & Categories -->
-    <section class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
+    <section class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8">
       <div class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
         
-        <!-- ডাইনামিক ক্যাটাগরি বাটন কন্টেইনার (গুগল শিট থেকে অটো তৈরি হবে) -->
-        <div id="filters" class="flex gap-2 overflow-x-auto pb-1">
+        <!-- Dynamic Category Container -->
+        <div id="filters" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           <div class="text-xs text-slate-500 py-2">ক্যাটাগরি লোড হচ্ছে...</div>
         </div>
 
-        <input id="search" class="search-box w-full lg:w-80 glass rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500" type="search" placeholder="পণ্য বা SKU দিয়ে খুঁজুন...">
+        <input id="search" class="search-box w-full lg:w-80 glass rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 transition" type="search" placeholder="পণ্য বা কীওয়ার্ড দিয়ে খুঁজুন...">
       </div>
 
-      <div class="flex items-center justify-between mt-6">
-        <p id="resultCount" class="text-sm text-slate-400"></p>
+      <div class="flex items-center justify-between mt-6 px-1">
+        <p id="resultCount" class="text-sm font-medium text-slate-400"></p>
       </div>
 
-      <!-- লোডিং স্পিনার -->
-      <div id="loadingState" class="py-16 text-center">
-        <div class="inline-block w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-3 text-sm text-slate-400">পণ্য লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+      <!-- Loading State -->
+      <div id="loadingState" class="py-20 text-center">
+        <div class="inline-block w-9 h-9 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-3 text-sm text-slate-400 font-medium">পণ্য লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
       </div>
 
       <!-- Product Grid -->
-      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 mt-4"></div>
+      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 sm:gap-5 mt-4"></div>
 
       <!-- Empty State -->
-      <div id="emptyState" class="hidden glass rounded-3xl p-12 text-center mt-5">
+      <div id="emptyState" class="hidden glass rounded-3xl p-12 text-center mt-6">
         <div class="text-5xl mb-4">🔎</div>
         <h2 class="text-xl font-bold">কোনো পণ্য পাওয়া যায়নি</h2>
         <p class="text-sm text-slate-400 mt-2">অন্য ক্যাটাগরি বা কীওয়ার্ড দিয়ে চেষ্টা করুন।</p>
@@ -172,12 +180,12 @@
     </section>
   </main>
 
-  <footer class="border-t border-cyan-400/10 mt-10">
+  <footer class="border-t border-cyan-400/15 mt-12 bg-[#02060d]">
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-slate-500">
-      <div class="font-black text-slate-200 text-lg">KHAN TRADERS</div>
-      <div class="mt-2">স্বস্তিপুর ভাদালিয়া বাজার, কুষ্টিয়া সদর, কুষ্টিয়া</div>
-      <div class="mt-1">Hotline: <a href="tel:01751297055" class="text-cyan-300">01751297055</a></div>
-      <div class="mt-4 text-xs">© <span id="year"></span> KHAN TRADERS — All rights reserved.</div>
+      <div class="font-black text-slate-200 text-lg tracking-wide">KHAN TRADERS</div>
+      <div class="mt-2 text-slate-400">স্বস্তিপুর ভাদালিয়া বাজার, কুষ্টিয়া সদর, কুষ্টিয়া</div>
+      <div class="mt-1">Hotline: <a href="tel:01751297055" class="text-cyan-300 font-semibold hover:underline">01751297055</a></div>
+      <div class="mt-4 text-xs text-slate-600">© <span id="year"></span> KHAN TRADERS — All rights reserved.</div>
     </div>
   </footer>
 
@@ -198,7 +206,6 @@
       return '৳ ' + Number(n || 0).toLocaleString('en-BD');
     }
 
-    // ১. গুগল শিট থেকে অটোমেটিক ক্যাটাগরি বাটন তৈরি
     function renderCategories(products) {
       if (!filtersDiv) return;
 
@@ -215,7 +222,7 @@
       categoryMap.forEach((name, catKey) => {
         const isActive = catKey === activeCategory ? 'active' : '';
         buttonsHTML += `
-          <button data-category="${catKey}" class="filter-btn ${isActive} shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-bold transition">
+          <button data-category="${catKey}" class="filter-btn ${isActive} shrink-0 px-4 py-2.5 rounded-xl border border-slate-700/80 text-sm font-bold text-slate-300 hover:text-white">
             ${name}
           </button>
         `;
@@ -233,7 +240,6 @@
       });
     }
 
-    // ২. প্রোডাক্ট কার্ড রেন্ডারার
     function productCard(product){
       const image = product?.images?.[0] || '';
       const unit = product?.unit ? '/ ' + product.unit : '';
@@ -251,48 +257,47 @@
       }
 
       return `
-        <article class="product-card glass rounded-xl sm:rounded-2xl overflow-hidden flex flex-col">
-          <a href="product.html?id=${id}" class="block">
+        <article class="product-card glass rounded-2xl overflow-hidden flex flex-col">
+          <a href="product.html?id=${id}" class="block overflow-hidden">
             <div class="product-image relative ${image ? '' : 'no-image'}">
               ${image ? `<img src="${image}" alt="${product?.name || 'পণ্য'}" loading="lazy" onerror="this.closest('.product-image').classList.add('no-image')">` : ''}
               <div class="image-fallback">
                 <div class="text-4xl">📦</div>
               </div>
-              ${product?.badge ? `<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded-md ${badgeClass} text-[9px] font-black tracking-wider uppercase">${product.badge}</span>` : ''}
-              ${product?.categoryName ? `<span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-slate-950/80 border border-white/10 text-[10px] font-bold text-cyan-300">${product.categoryName}</span>` : ''}
+              ${product?.badge ? `<span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg ${badgeClass} text-[9px] font-black tracking-wider uppercase shadow-md">${product.badge}</span>` : ''}
+              ${product?.categoryName ? `<span class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-slate-950/85 border border-white/10 text-[10px] font-bold text-cyan-300">${product.categoryName}</span>` : ''}
             </div>
           </a>
 
-          <div class="p-2.5 sm:p-3 flex flex-col flex-1">
+          <div class="p-3.5 flex flex-col flex-1">
             <a href="product.html?id=${id}">
-              <h2 class="font-bold text-[13px] sm:text-sm leading-5 line-clamp-2 min-h-[2.5rem] hover:text-cyan-300 transition">${product?.name || 'অজ্ঞাত পণ্য'}</h2>
+              <h2 class="font-bold text-[13px] sm:text-sm leading-5 line-clamp-2 min-h-[2.5rem] text-slate-100 hover:text-cyan-300 transition">${product?.name || 'অজ্ঞাত পণ্য'}</h2>
             </a>
 
-            <div class="hidden sm:flex flex-wrap gap-1 mt-2">
-              ${specs.slice(0, 2).map(s => `<span class="px-1.5 py-0.5 rounded-md bg-white/[.04] border border-white/[.06] text-[10px] text-slate-400 line-clamp-1 max-w-full">${s}</span>`).join('')}
+            <div class="hidden sm:flex flex-wrap gap-1 mt-2.5">
+              ${specs.slice(0, 2).map(s => `<span class="px-2 py-0.5 rounded-md bg-white/[.04] border border-white/[.06] text-[10px] text-slate-400 line-clamp-1 max-w-full">${s}</span>`).join('')}
             </div>
 
-            <div class="mt-auto pt-3">
+            <div class="mt-auto pt-3.5">
               <div class="flex items-end justify-between gap-2">
                 <div class="leading-none">
                   ${product?.oldPrice ? `<div class="text-[11px] text-slate-400 line-through mb-1">${taka(product.oldPrice)}</div>` : ''}
                   <div class="text-lg sm:text-xl font-black text-cyan-300">${taka(product?.price)}</div>
                   ${unit ? `<div class="text-[10px] text-slate-500 mt-1">${unit}</div>` : ''}
                 </div>
-                <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold ${product?.stock ? 'text-emerald-400' : 'text-rose-400'}">
-                  <span class="w-1.5 h-1.5 rounded-full ${product?.stock ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold ${product?.stock ? 'text-emerald-400' : 'text-rose-400'}">
+                  <span class="w-2 h-2 rounded-full ${product?.stock ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-rose-400'}"></span>
                   ${product?.stock ? 'স্টকে আছে' : 'স্টক শেষ'}
                 </div>
               </div>
 
-              <div class="mt-3" data-cart-actions="${product?.id || ''}"></div>
+              <div class="mt-3.5" data-cart-actions="${product?.id || ''}"></div>
             </div>
           </div>
         </article>
       `;
     }
 
-    // ৩. ফিল্টারিং ও সার্চ ফাংশন
     function render(){
       const keyword = (search?.value || '').trim().toLowerCase();
       const list = Array.isArray(window.PRODUCTS) ? window.PRODUCTS : [];
@@ -317,7 +322,6 @@
       if (window.Cart && typeof Cart.refreshActions === 'function') Cart.refreshActions();
     }
 
-    // ৪. গুগল শিট থেকে লাইভ ডেটা ফেচ করা
     async function loadProductsFromSheet() {
       try {
         if (loadingState) loadingState.classList.remove('hidden');
@@ -332,7 +336,7 @@
       } catch (err) {
         console.error("প্রোডাক্ট লোড হতে সমস্যা:", err);
         if (loadingState) {
-          loadingState.innerHTML = `<p class="text-rose-400 text-sm">পণ্য লোড করতে ব্যর্থ হয়েছে। ইন্টারনেট চেক করুন।</p>`;
+          loadingState.innerHTML = `<p class="text-rose-400 text-sm font-medium">পণ্য লোড করতে ব্যর্থ হয়েছে। ইন্টারনেট কানেকশন চেক করুন।</p>`;
         }
       }
     }

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khan Traders - Secure Product Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030914] text-slate-100 font-sans p-4 sm:p-6">
+
+  <!-- Password Protect Box -->
+  <div id="authBox" class="max-w-md mx-auto mt-20 glass p-6 rounded-2xl border border-cyan-400/20 bg-[#081628] text-center shadow-2xl">
+    <h2 class="text-lg font-black mb-4 text-cyan-300">🔐 গোপন অ্যাডমিন পোর্টাল</h2>
+    <p class="text-xs text-slate-400 mb-4">প্রবেশ করার জন্য পাসওয়ার্ড দিন:</p>
+    <input type="password" id="adminPass" placeholder="পাসওয়ার্ড দিন..." class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm mb-3 text-center text-white focus:outline-none focus:border-cyan-400">
+    <button onclick="checkPassword()" class="w-full py-2.5 rounded-xl bg-cyan-600 font-bold text-white text-sm hover:bg-cyan-500 transition">লগইন</button>
+    <p id="errAuth" class="text-rose-400 text-xs mt-2 hidden font-semibold">ভুল পাসওয়ার্ড!</p>
+  </div>
+
+  <!-- Main Form Box -->
+  <div id="formContainer" class="max-w-xl mx-auto glass p-6 rounded-2xl border border-cyan-400/20 bg-[#081628] hidden shadow-2xl">
+    <h1 class="text-xl font-black mb-4 text-cyan-300">📦 নতুন পণ্য যুক্ত করুন (Khan Product)</h1>
+    
+    <form id="addProductForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold mb-1">Product ID (যেমন: kt-05)</label>
+        <input type="text" id="prodId" required class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+      </div>
+      <div>
+        <label class="block text-sm font-bold mb-1">পণ্যের নাম</label>
+        <input type="text" id="prodName" required class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-bold mb-1">মূল্য (Price)</label>
+          <input type="number" id="prodPrice" required class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">পূর্বের মূল্য (Old Price)</label>
+          <input type="number" id="prodOldPrice" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+        </div>
+      </div>
+
+      <!-- Category Selection -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-bold mb-1">ক্যাটাগরি নির্বাচন করুন</label>
+          <select id="categorySelect" onchange="handleCategoryChange()" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400 text-white">
+            <option value="">ক্যাটাগরি লোড হচ্ছে...</option>
+          </select>
+        </div>
+        
+        <div id="newCategoryBox" class="hidden grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold mb-1 text-cyan-400">Key (যেমন: biscuit)</label>
+            <input type="text" id="newCatKey" placeholder="key" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1 text-cyan-400">Name (যেমন: বিস্কুট)</label>
+            <input type="text" id="newCatName" placeholder="নাম" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">ইউনিট (যেমন: প্যাকেট / বক্স)</label>
+        <input type="text" id="prodUnit" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+      </div>
+      <div>
+        <label class="block text-sm font-bold mb-1">ছবির লিংক (Drive link or Image URL)</label>
+        <input type="text" id="prodImage" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+      </div>
+      <div>
+        <label class="block text-sm font-bold mb-1">ব্যাজ (যেমন: HOT বা 10% OFF)</label>
+        <input type="text" id="prodBadge" class="w-full bg-[#030914] border border-slate-700 rounded-xl p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+      </div>
+      
+      <button type="submit" id="submitBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 font-bold text-white text-sm hover:opacity-90 transition">
+        পণ্য সেভ করুন
+      </button>
+    </form>
+    <div id="msg" class="mt-3 text-center text-sm font-semibold"></div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; // আপনার Google Apps Script URL এখানে বসাবেন
+
+    function checkPassword() {
+      const pass = document.getElementById('adminPass').value;
+      if (pass === "khan2026") {
+        document.getElementById('authBox').classList.add('hidden');
+        document.getElementById('formContainer').classList.remove('hidden');
+        loadCategories();
+      } else {
+        document.getElementById('errAuth').classList.remove('hidden');
+      }
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getCategories`);
+        const categories = await res.json();
+        
+        const select = document.getElementById('categorySelect');
+        let html = '<option value="">-- ক্যাটাগরি সিলেক্ট করুন --</option>';
+        
+        if (Array.isArray(categories) && categories.length > 0) {
+          categories.forEach(cat => {
+            html += `<option value="${cat.key}" data-name="${cat.name}">${cat.name} (${cat.key})</option>`;
+          });
+        }
+        // সবার শেষে নতুন ক্যাটাগরি যোগ করার অপশন থাকবে
+        html += `<option value="new">➕ নতুন ক্যাটাগরি যোগ করুন</option>`;
+        select.innerHTML = html;
+      } catch (err) {
+        console.error("Category load error:", err);
+      }
+    }
+
+    function handleCategoryChange() {
+      const select = document.getElementById('categorySelect');
+      const newBox = document.getElementById('newCategoryBox');
+      if (select.value === 'new') {
+        newBox.classList.remove('hidden');
+      } else {
+        newBox.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('msg');
+      
+      const select = document.getElementById('categorySelect');
+      let catKey = "";
+      let catName = "";
+
+      if (select.value === 'new') {
+        catKey = document.getElementById('newCatKey').value.trim();
+        catName = document.getElementById('newCatName').value.trim();
+      } else {
+        catKey = select.value;
+        const selectedOption = select.options[select.selectedIndex];
+        catName = selectedOption.getAttribute('data-name');
+      }
+
+      if (!catKey || !catName) {
+        msg.textContent = "দয়া করে ক্যাটাগরি সঠিকভাবে দিন!";
+        msg.className = "mt-3 text-center text-sm text-rose-400 font-bold";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "সেভ হচ্ছে...";
+      
+      const formData = {
+        action: 'addProduct',
+        id: document.getElementById('prodId').value,
+        name: document.getElementById('prodName').value,
+        price: document.getElementById('prodPrice').value,
+        oldPrice: document.getElementById('prodOldPrice').value,
+        unit: document.getElementById('prodUnit').value,
+        category: catKey,
+        categoryName: catName,
+        image: document.getElementById('prodImage').value,
+        badge: document.getElementById('prodBadge').value,
+        stock: true
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        msg.textContent = "পণ্য সফলভাবে যুক্ত হয়েছে!";
+        msg.className = "mt-3 text-center text-sm text-emerald-400 font-bold";
+        document.getElementById('addProductForm').reset();
+        document.getElementById('newCategoryBox').classList.add('hidden');
+        loadCategories();
+      } catch (err) {
+        msg.textContent = "সমস্যা হয়েছে, আবার চেষ্টা করুন।";
+        msg.className = "mt-3 text-center text-sm text-rose-400 font-bold";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "পণ্য সেভ করুন";
+      }
+    });
+  </script>
+</body>
+</html>
