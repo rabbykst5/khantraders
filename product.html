@@ -47,7 +47,7 @@
     .gallery-main img{
       width:100%;
       height:100%;
-      object-fit:contain;
+      object-fit:cover;
       display:block;
     }
     .thumb{
@@ -96,7 +96,7 @@
           <img src="logo.jpg" alt="Khan Traders Logo" class="site-logo w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0 rounded-xl" onerror="this.style.display='none'">
           <div class="min-w-0">
             <div class="font-black tracking-wide text-lg sm:text-xl truncate">Khan Traders</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 truncate">বিশ্বাস, স্বাদ ও গুণমান।</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 truncate">বিশ্বাস, গতি ও নেটওয়ার্কিং সলিউশন।</div>
           </div>
         </a>
 
@@ -233,7 +233,7 @@
   </footer>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9Y5Dp1VSBPc4FAlxuQ9vXyuY_dC9-XYRubqTRrLUpb7SWiGhwkxwfYct4_3hvLyHS/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7LEbcFbF1zzyVe01UmZj3jqmpnsUhguIaeTGvxPMn5G2laNP0sMtXLJFKa3d9t9nI/exec";
 
     const params = new URLSearchParams(window.location.search);
     const productId = (params.get('id') || '').trim();
@@ -280,18 +280,20 @@
       document.getElementById('breadcrumbProduct').textContent = product.name;
       document.getElementById('categoryBadge').textContent = product.categoryName || product.category || 'পণ্য';
       
-      // ব্যাজের ধরন ও রঙ নিয়ন্ত্রণ
       const testBadge = document.getElementById('testBadge');
-      if (product.badge) {
+      let rawBadge = product.badge || '';
+      if (rawBadge.toUpperCase() === 'TRUE' || rawBadge.toUpperCase() === 'FALSE') {
+        rawBadge = '';
+      }
+
+      if (rawBadge) {
         testBadge.classList.remove('hidden');
-        testBadge.textContent = product.badge;
-        const bText = product.badge.toUpperCase();
+        testBadge.textContent = rawBadge;
+        const bText = rawBadge.toUpperCase();
         if (bText.includes('OFF') || bText.includes('ছাড়') || bText.includes('DISCOUNT')) {
           testBadge.className = 'px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[10px] font-black tracking-wider uppercase';
         } else if (bText.includes('HOT') || bText.includes('DEAL')) {
           testBadge.className = 'px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-[10px] font-black tracking-wider uppercase';
-        } else if (!product.stock || bText.includes('আউট')) {
-          testBadge.className = 'px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 text-[10px] font-black tracking-wider uppercase';
         } else {
           testBadge.className = 'px-2.5 py-1 rounded-lg bg-cyan-400 text-slate-950 text-[10px] font-black tracking-wider uppercase';
         }
@@ -300,9 +302,8 @@
       }
 
       document.getElementById('productName').textContent = product.name;
-      document.getElementById('productDescription').textContent = product.description || '১০০% খাঁটি ও গুণগত মানসম্পন্ন পণ্য। বিশ্বাস ও স্বাদের অনন্য সমাহার।';
+      document.getElementById('productDescription').textContent = product.description || '';
 
-      // পুরনো দাম কেটে দেখানো
       const oldPriceEl = document.getElementById('productOldPrice');
       if (product.oldPrice) {
         oldPriceEl.textContent = taka(product.oldPrice);
@@ -316,38 +317,39 @@
 
       const stockDot = document.getElementById('stockDot');
       const stockText = document.getElementById('stockText');
+      const buyNow = document.getElementById('buyNowBtn');
 
       if(product.stock){
         stockDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
         stockText.className = 'text-emerald-400 font-bold';
         stockText.textContent = 'স্টকে আছে';
-      }else{
+        buyNow.disabled = false;
+        buyNow.classList.remove('opacity-50','cursor-not-allowed');
+      } else {
         stockDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400';
         stockText.className = 'text-rose-400 font-bold';
         stockText.textContent = 'স্টক শেষ';
-      }
-
-      // স্পেসিফিকেশন রেন্ডার
-      const specs = Array.isArray(product.specs) && product.specs.length 
-        ? product.specs 
-        : [`ক্যাটাগরি: ${product.categoryName || 'সাধারণ'}`, `একক: ${product.unit || 'পিস'}`];
-
-      document.getElementById('specGrid').innerHTML = specs.map((spec, i) => `
-        <div class="spec-item rounded-xl px-4 py-3">
-          <div class="text-[10px] uppercase tracking-wider text-slate-600">Specification ${i + 1}</div>
-          <div class="text-sm font-bold text-slate-200 mt-0.5">${spec}</div>
-        </div>
-      `).join('');
-
-      const actions = document.getElementById('cartActions');
-      const buyNow = document.getElementById('buyNowBtn');
-      actions.setAttribute('data-cart-actions', product.id);
-      
-      if(!product.stock){
         buyNow.disabled = true;
         buyNow.classList.add('opacity-50','cursor-not-allowed');
       }
-      buyNow.addEventListener('click', () => window.Cart && Cart.buyNow(product.id));
+
+      // স্পেসিফিকেশন রেন্ডার
+      const specs = Array.isArray(product.specs) ? product.specs : [];
+      document.getElementById('specGrid').innerHTML = specs.length > 0 ? specs.map((spec, i) => `
+        <div class="spec-item rounded-xl px-4 py-3">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500">Feature ${i + 1}</div>
+          <div class="text-sm font-bold text-slate-200 mt-0.5">${spec}</div>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-500">কোনো স্পেসিফিকেশন নেই</p>';
+
+      const actions = document.getElementById('cartActions');
+      actions.setAttribute('data-cart-actions', product.id);
+      
+      buyNow.onclick = () => {
+        if(product.stock && window.Cart && typeof Cart.buyNow === 'function') {
+          Cart.buyNow(product.id);
+        }
+      };
 
       if (window.Cart && typeof Cart.refreshActions === 'function') {
         Cart.refreshActions();
@@ -358,15 +360,22 @@
     }
 
     function renderGallery(){
-      const images = Array.isArray(product?.images) && product.images.length ? product.images : [];
+      // ইমেজ ফেচিং ঠিক করা হলো (image বা images অ্যারে যেকোনো একটি থাকলেই কাজ করবে)
+      let images = [];
+      if (Array.isArray(product?.images) && product.images.length > 0) {
+        images = product.images;
+      } else if (product?.image) {
+        images = [product.image];
+      }
+
       const main = document.getElementById('mainImage');
       const thumbs = document.getElementById('thumbnailGrid');
       const counter = document.getElementById('imageCounter');
 
       if(!images.length){
-        main.style.display = 'none';
+        main.src = 'https://via.placeholder.com/400x400/081628/00f0ff?text=No+Image';
         thumbs.innerHTML = '';
-        counter.textContent = 'No Image';
+        counter.textContent = '0/0';
         return;
       }
 
@@ -374,32 +383,29 @@
       main.src = images[currentImage];
       main.alt = (product?.name || '') + ' — image ' + (currentImage + 1);
 
-      main.onerror = () => { main.style.display = 'none'; };
-      main.onload = () => { main.style.display = 'block'; };
-
       counter.textContent = (currentImage + 1) + ' / ' + images.length;
 
       thumbs.innerHTML = images.map((src, i) => `
-        <button type="button" class="thumb rounded-xl ${i === currentImage ? 'active' : ''}" onclick="selectImage(${i})" aria-label="Image ${i + 1}">
-          <img src="${src}" alt="thumbnail ${i + 1}" loading="lazy" onerror="this.style.opacity='.15'">
+        <button type="button" class="thumb rounded-xl overflow-hidden ${i === currentImage ? 'active' : ''}" onclick="selectImage(${i})" aria-label="Image ${i + 1}">
+          <img src="${src}" alt="thumbnail ${i + 1}" loading="lazy" onerror="this.src='https://via.placeholder.com/100x100/081628/00f0ff?text=Img'">
         </button>
       `).join('');
     }
 
     window.selectImage = function(index){
-      const images = product?.images || [];
+      const images = (Array.isArray(product?.images) && product.images.length > 0) ? product.images : (product?.image ? [product.image] : []);
       if(!images.length) return;
       currentImage = (index + images.length) % images.length;
       renderGallery();
     };
 
     document.getElementById('prevBtn').addEventListener('click', () => {
-      const images = product?.images || [];
+      const images = (Array.isArray(product?.images) && product.images.length > 0) ? product.images : (product?.image ? [product.image] : []);
       if(images.length) selectImage(currentImage - 1);
     });
 
     document.getElementById('nextBtn').addEventListener('click', () => {
-      const images = product?.images || [];
+      const images = (Array.isArray(product?.images) && product.images.length > 0) ? product.images : (product?.image ? [product.image] : []);
       if(images.length) selectImage(currentImage + 1);
     });
 
@@ -422,22 +428,25 @@
 
       const items = [...related, ...fallback];
 
-      document.getElementById('relatedGrid').innerHTML = items.map(p => `
-        <a href="product.html?id=${encodeURIComponent(p.id)}" class="glass rounded-2xl overflow-hidden group hover:border-cyan-400/40 transition">
-          <div class="aspect-[4/3] bg-[#071827] overflow-hidden">
-            <img src="${p.images?.[0] || ''}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                 loading="lazy" onerror="this.style.opacity='.15'">
-          </div>
-          <div class="p-4">
-            <div class="text-[11px] text-cyan-300 font-bold">${p.categoryName || p.category}</div>
-            <h3 class="font-bold mt-1 line-clamp-2">${p.name}</h3>
-            <div class="flex items-baseline gap-2 mt-3">
-              ${p.oldPrice ? `<span class="text-xs text-slate-400 line-through">${taka(p.oldPrice)}</span>` : ''}
-              <span class="text-lg font-black text-cyan-300">${taka(p.price)}${p.unit ? ' / ' + p.unit : ''}</span>
+      document.getElementById('relatedGrid').innerHTML = items.map(p => {
+        let pImg = p.image || (p.images?.[0]) || 'https://via.placeholder.com/300x200/081628/00f0ff?text=Khan+Traders';
+        return `
+          <a href="product.html?id=${encodeURIComponent(p.id)}" class="glass rounded-2xl overflow-hidden group hover:border-cyan-400/40 transition">
+            <div class="aspect-[4/3] bg-[#071827] overflow-hidden">
+              <img src="${pImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                   loading="lazy" onerror="this.src='https://via.placeholder.com/300x200/081628/00f0ff?text=Khan+Traders'">
             </div>
-          </div>
-        </a>
-      `).join('');
+            <div class="p-4">
+              <div class="text-[11px] text-cyan-300 font-bold">${p.categoryName || p.category}</div>
+              <h3 class="font-bold mt-1 line-clamp-2">${p.name}</h3>
+              <div class="flex items-baseline gap-2 mt-3">
+                ${p.oldPrice ? `<span class="text-xs text-slate-400 line-through">${taka(p.oldPrice)}</span>` : ''}
+                <span class="text-lg font-black text-cyan-300">${taka(p.price)}${p.unit ? ' / ' + p.unit : ''}</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
     }
 
     document.getElementById('year').textContent = new Date().getFullYear();
