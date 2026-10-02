@@ -133,7 +133,7 @@
     <!-- TAB 3: Orders List -->
     <div id="tabOrdersContent" class="bg-[#081628] border border-cyan-400/20 p-6 rounded-2xl shadow-2xl hidden">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-black text-cyan-300">📦 গ্রাহকদের অর্ডার তালিকা</h2>
+        <h2 class="text-xl font-black text-cyan-300">📦 গ্রাহকদের অর্ডার তালিকা ও স্ট্যাটাস পরিবর্তন</h2>
         <button onclick="loadAdminOrders()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-cyan-300 text-xs font-bold border border-cyan-400/20 hover:bg-slate-700">🔄 রিফ্রেশ</button>
       </div>
       <div id="adminOrderList" class="space-y-3 overflow-x-auto">
@@ -280,14 +280,14 @@
                 <th class="p-3">গ্রাহক</th>
                 <th class="p-3">পণ্য ও দাম</th>
                 <th class="p-3">ঠিকানা</th>
-                <th class="p-3">স্ট্যাটাস</th>
+                <th class="p-3">স্ট্যাটাস পরিবর্তন</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800">
         `;
 
         orders.forEach(o => {
-          let orderDate = o.date ? new Date(o.date).toLocaleDateString('bn-BD') : 'N/A';
+          let orderDate = o.date ? new Date(o.date).toLocaleString('bn-BD', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A';
           html += `
             <tr class="hover:bg-slate-900/50">
               <td class="p-3 whitespace-nowrap text-slate-400">${orderDate}</td>
@@ -302,7 +302,13 @@
               </td>
               <td class="p-3 text-slate-400">${o.address}, ${o.thana}, ${o.district}</td>
               <td class="p-3 whitespace-nowrap">
-                <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold">${o.status}</span>
+                <select onchange="updateStatus('${o.orderId}', this.value)" class="bg-[#030914] border border-cyan-400/30 text-cyan-300 font-bold rounded-lg px-2 py-1.5 focus:outline-none">
+                  <option value="পেন্ডিং" ${o.status === 'পেন্ডিং' ? 'selected' : ''}>পেন্ডিং</option>
+                  <option value="কনফার্মড" ${o.status === 'কনফার্মড' ? 'selected' : ''}>কনফার্মড</option>
+                  <option value="শিপড" ${o.status === 'শিপড' ? 'selected' : ''}>শিপড</option>
+                  <option value="ডেলিভারড" ${o.status === 'ডেলিভারড' ? 'selected' : ''}>ডেলিভারড</option>
+                  <option value="ক্যান্সেলড" ${o.status === 'ক্যান্সেলড' ? 'selected' : ''}>ক্যান্সেলড</option>
+                </select>
               </td>
             </tr>
           `;
@@ -312,6 +318,22 @@
         container.innerHTML = html;
       } catch (err) {
         container.innerHTML = '<p class="text-rose-400 text-sm text-center py-6">অর্ডার তালিকা লোড করতে সমস্যা হয়েছে।</p>';
+      }
+    }
+
+    async function updateStatus(orderId, newStatus) {
+      try {
+        const url = `${SCRIPT_URL}?action=updateOrderStatus&orderId=${encodeURIComponent(orderId)}&status=${encodeURIComponent(newStatus)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if(data.success) {
+          alert("অর্ডার স্ট্যাটাস সফলভাবে গুগল শিটে আপডেট করা হয়েছে!");
+        } else {
+          alert("স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে!");
+        }
+      } catch (err) {
+        alert("সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি!");
       }
     }
 
