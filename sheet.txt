@@ -1,16 +1,5 @@
 /* =========================================================
-   KHAN TRADERS — Google Apps Script Backend
-   Admin Email : drazmulhossain@gmail.com
-   Live Website: https://rabbykst5.github.io/khantraders/
-
-   মূল বৈশিষ্ট্যসমূহ:
-   ১. getProducts — গুগল শিট থেকে লাইভ প্রোডাক্ট ও ক্যাটাগরি লোড।
-   ২. Google Drive Image Auto Converter — ড্রাইভের শেয়ার লিংক দিলে স্বয়ংক্রিয়ভাবে সরাসরি লোডযোগ্য ছবিতে রূপান্তর।
-   ৩. doGet — ফোন নম্বর বা অর্ডার আইডি দিয়ে লাইভ অর্ডার ট্র্যাকিং ও কুরিয়ার কোড রিড।
-   ৪. doPost — নতুন অর্ডার আসলে গুগল শিটের সবার উপরে (Row 2-তে) অটো ইনসার্ট।
-   ৫. UltraMsg WhatsApp API — গ্রাহকের হোয়াটসঅ্যাপে ফোন-ভিত্তিক ট্র্যাকিং লিংক অ্যালার্ট।
-   ৬. অ্যাডমিন ইমেইল অ্যালার্ট (Gmail Notifications)।
-   ৭. সরাসরি প্রিন্টযোগ্য চালান ডায়ালগ ও এক ক্লিকে ড্রাইভে PDF সেভ ও অটো ডাউনলোড।
+   KHAN TRADERS — Google Apps Script Backend (Full Complete Code)
    ========================================================= */
 
 const ADMIN_EMAIL = "drazmulhossain@gmail.com"; 
@@ -21,13 +10,39 @@ const ULTRAMSG_CONFIG = {
   TRACK_BASE_URL: "https://rabbykst5.github.io/khantraders/track.html"
 };
 
-// =========================================================
-// ১. রিড এন্ডপয়েন্ট (doGet) — ট্র্যাকিং এবং প্রোডাক্ট লোড
-// =========================================================
 function doGet(e) {
-  // ক. ওয়েবসাইট থেকে প্রোডাক্ট লোড করার রিকোয়েস্ট (action === 'getProducts')
-  if (e.parameter.action === 'getProducts') {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const action = e.parameter.action || '';
+
+  // ১. ক্যাটাগরি লোড
+  if (action === 'getCategories') {
+    const prodSheet = ss.getSheetByName('Products');
+    if (!prodSheet) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    const rows = prodSheet.getDataRange().getValues();
+    const categoriesMap = new Map();
+
+    for (let i = 1; i < rows.length; i++) {
+      const catKey = String(rows[i][5] || '').trim();
+      const catName = String(rows[i][6] || '').trim();
+      if (catKey && catName && !categoriesMap.has(catKey)) {
+        categoriesMap.set(catKey, catName);
+      }
+    }
+
+    const categories = [];
+    categoriesMap.forEach((name, key) => {
+      categories.push({ key: key, name: name });
+    });
+
+    return ContentService.createTextOutput(JSON.stringify(categories))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // ২. প্রোডাক্ট লোড
+  if (action === 'getProducts') {
     const prodSheet = ss.getSheetByName('Products');
     if (!prodSheet) {
       return ContentService.createTextOutput(JSON.stringify([]))
@@ -37,32 +52,43 @@ function doGet(e) {
     const rows = prodSheet.getDataRange().getValues();
     const products = [];
 
-    // Row 1 বাদ দিয়ে Row 2 থেকে প্রোডাক্ট পড়া শুরু হবে
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i];
-      if (!r[0]) continue; // ID না থাকলে স্কিপ করবে
+      const prodId = String(r[0] || '').trim();
+      if (!prodId) continue;
 
-      // গুগল ড্রাইভ লিংক অটো কনভার্টার লজিক
-      let imgUrl = String(r[7] || '').trim();
+      let imgUrl = String(r[11] || '').trim();
       if (imgUrl.includes('drive.google.com')) {
-        // লিংক থেকে File ID বের করা (/d/ID অথবা id=ID)
         const match = imgUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || imgUrl.match(/id=([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
           imgUrl = 'https://lh3.googleusercontent.com/d/' + match[1];
         }
       }
 
+      let rawSpecs = String(r[10] || '').trim();
+      let specsArray = rawSpecs ? rawSpecs.split(/[,،]+/).map(s => s.trim()).filter(s => s.length > 0) : [];
+      let stockVal = r[8];
+      let isStockTrue = stockVal === true || String(stockVal).trim().toUpperCase() === 'TRUE';
+
+      let badgeVal = String(r[7] || '').trim();
+      if (badgeVal.toUpperCase() === 'TRUE' || badgeVal.toUpperCase() === 'FALSE') {
+        badgeVal = '';
+      }
+
       products.push({
-        id: String(r[0]).trim(),
+        id: prodId,
         name: String(r[1] || '').trim(),
         price: Number(r[2]) || 0,
         oldPrice: Number(r[3]) || 0,
         unit: String(r[4] || '').trim(),
         category: String(r[5] || 'all').trim(),
         categoryName: String(r[6] || '').trim(),
-        images: imgUrl ? [imgUrl] : [],
-        badge: String(r[8] || '').trim(),
-        stock: r[9] === true || String(r[9]).trim().toUpperCase() === 'TRUE'
+        badge: badgeVal,
+        stock: isStockTrue,
+        description: String(r[9] || '').trim(),
+        specs: specsArray,
+        image: imgUrl,
+        images: imgUrl ? [imgUrl] : []
       });
     }
 
@@ -70,8 +96,71 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
-  // খ. ট্র্যাকিং পেজের জন্য রিকোয়েস্ট (id বা phone দিয়ে সার্চ)
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // ৩. অর্ডার লিস্ট লোড
+  if (action === 'getOrders') {
+    const sheet = ss.getActiveSheet();
+    const rows = sheet.getDataRange().getValues();
+    const orders = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row[1]) continue;
+      
+      orders.push({
+        date: row[0],
+        orderId: row[1],
+        name: row[2],
+        phone: row[3],
+        address: row[4],
+        thana: row[5],
+        district: row[6],
+        item: row[7],
+        total: row[8],
+        payMethod: row[9],
+        trxId: row[10],
+        status: row[11] || 'পেন্ডিং'
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(orders.reverse()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // ৪. অ্যাডমিন থেকে অর্ডার স্ট্যাটাস আপডেট করার ফিক্সড হ্যান্ডলার
+  if (action === 'updateOrderStatus') {
+    const orderId = String(e.parameter.orderId || '').trim();
+    const newStatus = String(e.parameter.status || '').trim();
+
+    if (!orderId || !newStatus) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Missing parameters" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const sheet = ss.getActiveSheet();
+    const rows = sheet.getDataRange().getValues();
+    let targetRowIndex = -1;
+
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][1]).trim().toLowerCase() === orderId.toLowerCase()) {
+        targetRowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Order ID not found" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Col L (12th column) এ স্ট্যাটাস সেট করা
+    sheet.getRange(targetRowIndex, 12).setValue(newStatus);
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Status updated successfully" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // ৫. ট্র্যাকিং সার্চ
+  const sheet = ss.getActiveSheet();
   const rows = sheet.getDataRange().getValues();
   const query = e.parameter.id ? e.parameter.id.trim() : (e.parameter.phone ? e.parameter.phone.trim() : '');
   
@@ -83,7 +172,6 @@ function doGet(e) {
   const cleanQuery = query.replace(/[^0-9]/g, '');
   const isPhoneSearch = cleanQuery.length >= 10;
   const targetId = query.toUpperCase();
-
   const matchingOrders = [];
 
   for (let i = 1; i < rows.length; i++) {
@@ -105,19 +193,10 @@ function doGet(e) {
     
     if (match) {
       matchingOrders.push({
-        date: row[0],
-        orderId: row[1],
-        name: row[2],
-        phone: row[3],
-        address: row[4],
-        thana: row[5],
-        district: row[6],
-        item: row[7],
-        total: row[8],
-        payMethod: row[9],
-        trxId: row[10],
-        status: row[11] || 'পেন্ডিং',
-        courierCode: row[12] ? String(row[12]).trim() : ''
+        date: row[0], orderId: row[1], name: row[2], phone: row[3],
+        address: row[4], thana: row[5], district: row[6], item: row[7],
+        total: row[8], payMethod: row[9], trxId: row[10],
+        status: row[11] || 'পেন্ডিং', courierCode: row[12] ? String(row[12]).trim() : ''
       });
     }
   }
@@ -131,12 +210,9 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// =========================================================
-// ২. অর্ডার সেভ করার এন্ডপয়েন্ট (সবার উপরে রো ২-তে ইনসার্ট)
-// =========================================================
 function doPost(e) {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     let data;
     
     if (e.postData && e.postData.contents) {
@@ -145,71 +221,61 @@ function doPost(e) {
       data = e.parameter;
     }
 
-    const timestamp = Utilities.formatDate(new Date(), "Asia/Dhaka", "yyyy-MM-dd hh:mm a");
-    const orderId = data.orderId || '';
-    const name = data.name || '';
-    const phone = data.phone || '';
-    const address = data.address || '';
-    const thana = data.thana || '';
-    const district = data.district || '';
-    const item = data.items || '';
-    const total = data.total || 0;
-    
-    let payMethod = 'ক্যাশ অন ডেলিভারি';
-    let trxId = 'N/A';
-
-    if (data.payMethod && (data.payMethod.includes('bKash') || data.payMethod.includes('mfs'))) {
-      payMethod = 'বিকাশ / নগদ';
-      if (data.payMethod.includes('Trx:')) {
-        trxId = data.payMethod.split('Trx:')[1].replace(')', '').trim();
-      } else if (data.trxId) {
-        trxId = data.trxId.trim();
-      }
-    } else if (data.trxId && data.trxId.trim().length > 0) {
-      payMethod = 'বিকাশ / নগদ';
-      trxId = data.trxId.trim();
+    let prodSheet = ss.getSheetByName('Products');
+    if (!prodSheet) {
+      prodSheet = ss.insertSheet('Products');
     }
-    
-    const status = 'পেন্ডিং';
 
-    const newRowData = [
-      timestamp,
-      orderId,
-      name,
-      phone,
-      address,
-      thana,
-      district,
-      item,
-      total,
-      payMethod,
-      trxId,
-      status,
-      '' // Courier Code কলাম
-    ];
+    if (data.action === 'addProduct') {
+      const newProdRow = [
+        String(data.id || '').trim(),
+        String(data.name || '').trim(),
+        Number(data.price) || 0,
+        Number(data.oldPrice) || 0,
+        String(data.unit || '').trim(),
+        String(data.category || '').trim(),
+        String(data.categoryName || '').trim(),
+        String(data.badge || '').trim(),
+        true,
+        String(data.description || '').trim(),
+        String(data.specs || '').trim(),
+        String(data.image || '').trim()
+      ];
+      prodSheet.appendRow(newProdRow);
+      return ContentService.createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
-    sheet.insertRowBefore(2);
-    sheet.getRange(2, 1, 1, newRowData.length).setValues([newRowData]);
+    if (data.action === 'updateProduct') {
+      const rows = prodSheet.getDataRange().getValues();
+      let targetRowIndex = -1;
 
-    const orderData = {
-      orderId: orderId,
-      name: name,
-      phone: phone,
-      district: district,
-      thana: thana,
-      address: address,
-      items: item,
-      total: total,
-      payMethod: payMethod,
-      trxId: trxId,
-      time: timestamp
-    };
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toLowerCase() === String(data.id).trim().toLowerCase()) {
+          targetRowIndex = i + 1;
+          break;
+        }
+      }
 
-    // ১. অ্যাডমিনের ইমেইল অ্যালার্ট
-    sendAdminEmail(orderData);
+      if (targetRowIndex === -1) {
+        return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Product ID not found" }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
 
-    // ২. UltraMsg দিয়ে গ্রাহকের WhatsApp মেসেজ
-    sendCustomerWhatsApp(orderData);
+      prodSheet.getRange(targetRowIndex, 2).setValue(String(data.name || '').trim());
+      prodSheet.getRange(targetRowIndex, 3).setValue(Number(data.price) || 0);
+      prodSheet.getRange(targetRowIndex, 4).setValue(Number(data.oldPrice) || 0);
+      prodSheet.getRange(targetRowIndex, 5).setValue(String(data.unit || '').trim());
+      prodSheet.getRange(targetRowIndex, 6).setValue(String(data.category || '').trim());
+      prodSheet.getRange(targetRowIndex, 7).setValue(String(data.categoryName || '').trim());
+      prodSheet.getRange(targetRowIndex, 8).setValue(String(data.badge || '').trim());
+      prodSheet.getRange(targetRowIndex, 9).setValue(data.stock === true || String(data.stock).toUpperCase() === 'TRUE');
+      prodSheet.getRange(targetRowIndex, 11).setValue(String(data.specs || '').trim());
+      prodSheet.getRange(targetRowIndex, 12).setValue(String(data.image || '').trim());
+
+      return ContentService.createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
     return ContentService.createTextOutput(JSON.stringify({ success: true }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -218,400 +284,4 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-// =========================================================
-// ৩. UltraMsg WhatsApp মেসেজ ফাংশন (ফোন ট্র্যাকিং লিংকসহ)
-// =========================================================
-function sendCustomerWhatsApp(order) {
-  try {
-    let phone = String(order.phone).replace(/[^0-9]/g, '');
-    if (phone.startsWith('880')) phone = phone.slice(3);
-    else if (phone.startsWith('0')) phone = phone.slice(1);
-    
-    const formattedPhone = "+880" + phone;
-    const customerPhoneOnly = "0" + phone;
-    const trackLink = `${ULTRAMSG_CONFIG.TRACK_BASE_URL}?phone=${encodeURIComponent(customerPhoneOnly)}`;
-    
-    const messageBody = 
-      `🛒 *খান ট্রেডার্স (Khan Traders)*\n` +
-      `--------------------------------\n` +
-      `প্রিয় *${order.name}*,\n` +
-      `আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে।\n\n` +
-      `📦 *অর্ডার নম্বর:* ${order.orderId}\n` +
-      `💰 *পরিশোধযোগ্য বিল:* ৳ ${Number(order.total).toLocaleString('en-BD')}\n` +
-      `💳 *পেমেন্ট পদ্ধতি:* ${order.payMethod}\n` +
-      (order.trxId !== 'N/A' ? `📝 *TrxID:* ${order.trxId}\n` : '') +
-      `\n📍 *আপনার সকল অর্ডার লাইভ ট্র্যাক করুন:*\n${trackLink}\n\n` +
-      `📞 হটলাইন: 01751297055\n` +
-      `_ধন্যবাদ আমাদের সাথে কেনাকাটা করার জন্য!_`;
-
-    const payload = {
-      token: ULTRAMSG_CONFIG.TOKEN,
-      to: formattedPhone,
-      body: messageBody
-    };
-
-    const options = {
-      method: "POST",
-      contentType: "application/x-www-form-urlencoded",
-      payload: payload,
-      muteHttpExceptions: true
-    };
-
-    const url = `https://api.ultramsg.com/${ULTRAMSG_CONFIG.INSTANCE_ID}/messages/chat`;
-    const res = UrlFetchApp.fetch(url, options);
-    Logger.log("UltraMsg WhatsApp Response: " + res.getContentText());
-
-  } catch (err) {
-    Logger.log("UltraMsg Sending Error: " + err.message);
-  }
-}
-
-// =========================================================
-// ৪. অ্যাডমিন ইমেইল অ্যালার্ট ফাংশন
-// =========================================================
-function sendAdminEmail(order) {
-  try {
-    const subject = `🚨 নতুন অর্ডার এসেছে! #${order.orderId} (${order.payMethod}) — Khan Traders`;
-    
-    const htmlBody = `
-      <div style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 20px; color: #1e293b;">
-        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-          <div style="background: #0891b2; color: #ffffff; padding: 18px 24px;">
-            <h2 style="margin: 0; font-size: 20px;">নতুন অর্ডার অ্যালার্ট (Khan Traders)</h2>
-            <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">অর্ডার আইডি: <b>${order.orderId}</b> | সময়: ${order.time}</p>
-          </div>
-          
-          <div style="padding: 24px;">
-            <h3 style="margin-top: 0; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">গ্রাহকের বিবরণ:</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 16px;">
-              <tr><td style="padding: 6px 0; color: #64748b; width: 120px;">নাম:</td><td style="font-weight: bold;">${order.name}</td></tr>
-              <tr><td style="padding: 6px 0; color: #64748b;">মোবাইল:</td><td><a href="tel:${order.phone}" style="color: #0284c7; font-weight: bold; text-decoration: none;">${order.phone}</a></td></tr>
-              <tr><td style="padding: 6px 0; color: #64748b;">জেলা ও থানা:</td><td>${order.district}, ${order.thana}</td></tr>
-              <tr><td style="padding: 6px 0; color: #64748b;">ঠিকানা:</td><td>${order.address}</td></tr>
-            </table>
-
-            <h3 style="color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">পেমেন্ট বিবরণ:</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 16px;">
-              <tr><td style="padding: 6px 0; color: #64748b; width: 120px;">পেমেন্ট মোড:</td><td style="font-weight: bold; color: ${order.payMethod === 'বিকাশ / নগদ' ? '#db2777' : '#0284c7'};">${order.payMethod}</td></tr>
-              ${order.trxId !== 'N/A' ? `<tr><td style="padding: 6px 0; color: #64748b;">TrxID:</td><td style="font-weight: bold; font-family: monospace; font-size: 15px; color: #db2777;">${order.trxId}</td></tr>` : ''}
-            </table>
-
-            <h3 style="color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">অর্ডারকৃত পণ্য:</h3>
-            <div style="background: #f1f5f9; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-              ${order.items}
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 14px 18px; border-radius: 8px;">
-              <span style="font-size: 15px; font-weight: bold; color: #065f46;">পরিশোধযোগ্য সর্বমোট বিল:</span>
-              <span style="font-size: 20px; font-weight: 900; color: #047857;">৳ ${Number(order.total).toLocaleString('en-BD')}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    MailApp.sendEmail({
-      to: ADMIN_EMAIL,
-      subject: subject,
-      htmlBody: htmlBody
-    });
-  } catch (e) {
-    Logger.log("Email sending error: " + e.message);
-  }
-}
-
-// =========================================================
-// ৫. মেনুবার অপশন (প্রিন্ট ও পিডিএফ ডাউনলোড)
-// =========================================================
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  ui.createMenu('📦 ইনভয়েস ম্যানেজমেন্ট')
-    .addItem('🖨️ নির্বাচিত রো প্রিন্ট করুন', 'printSelectedRowInvoice')
-    .addItem('📥 পিডিএফ ডাউনলোড ও ড্রাইভে সেভ করুন', 'downloadInvoicePDF')
-    .addToUi();
-}
-
-// =========================================================
-// ৬. চালান সরাসরি প্রিন্ট ডায়ালগ
-// =========================================================
-function printSelectedRowInvoice() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const row = sheet.getActiveRange().getRow();
-
-  if (row <= 1) {
-    SpreadsheetApp.getUi().alert('দয়া করে ২ নম্বর রো বা তার নিচের কোনো অর্ডারের সেল নির্বাচন করুন।');
-    return;
-  }
-
-  const data = sheet.getRange(row, 1, 1, 13).getValues()[0];
-
-  const order = {
-    date: data[0] ? Utilities.formatDate(new Date(data[0]), "Asia/Dhaka", "dd/MM/yyyy hh:mm a") : '',
-    orderId: data[1] || '',
-    name: data[2] || '',
-    phone: data[3] || '',
-    address: data[4] || '',
-    thana: data[5] || '',
-    district: data[6] || '',
-    items: data[7] || '',
-    total: data[8] || 0,
-    payMethod: data[9] || 'ক্যাশ অন ডেলিভারি',
-    trxId: data[10] || 'N/A',
-    status: data[11] || 'পেন্ডিং'
-  };
-
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>চালান #${order.orderId}</title>
-      <style>
-        body { font-family: sans-serif; margin: 0; padding: 24px; color: #1e293b; background: #fff; }
-        .invoice-box { max-width: 650px; margin: auto; border: 1px dashed #94a3b8; padding: 24px; border-radius: 8px; }
-        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 14px; }
-        .company-name { font-size: 22px; font-weight: 900; color: #0891b2; margin: 0; }
-        .company-sub { font-size: 11px; color: #64748b; margin-top: 4px; }
-        .inv-title { text-align: right; }
-        .inv-title h2 { margin: 0; font-size: 18px; color: #0f172a; }
-        .inv-title p { margin: 4px 0 0; font-size: 11px; color: #64748b; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; font-size: 13px; }
-        .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
-        .box b { display: block; font-size: 11px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
-        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
-        th { background: #f1f5f9; color: #334155; }
-        .total-box { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 6px; font-size: 15px; font-weight: bold; }
-        .footer { margin-top: 24px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
-        .btn-print { background: #0891b2; color: #fff; border: 0; padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; margin-bottom: 16px; }
-        @media print {
-          .no-print { display: none !important; }
-          body { padding: 0; }
-          .invoice-box { border: 0; padding: 0; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="no-print" style="text-align: right; max-width: 650px; margin: auto;">
-        <button class="btn-print" onclick="window.print()">🖨️ এখনই প্রিন্ট করুন</button>
-      </div>
-      <div class="invoice-box">
-        <div class="header">
-          <div>
-            <h1 class="company-name">KHAN TRADERS</h1>
-            <div class="company-sub">স্বস্তিপুর ভাদালিয়া বাজার, কুষ্টিয়া সদর, কুষ্টিয়া<br>হটলাইন: 01751297055</div>
-          </div>
-          <div class="inv-title">
-            <h2>ডেলিভারি চালান</h2>
-            <p>অর্ডার নং: <b>${order.orderId}</b><br>তারিখ: ${order.date}</p>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="box">
-            <b>প্রাপকের বিবরণ:</b>
-            <div style="font-weight: bold; font-size: 14px;">${order.name}</div>
-            <div>ফোন: ${order.phone}</div>
-            <div>ঠিকানা: ${order.address}</div>
-            <div>থানা: ${order.thana}, জেলা: ${order.district}</div>
-          </div>
-          <div class="box">
-            <b>পেমেন্টের বিবরণ:</b>
-            <div>পদ্ধতি: <b>${order.payMethod}</b></div>
-            ${order.trxId !== 'N/A' ? `<div>TrxID: <span style="font-family: monospace; font-weight: bold;">${order.trxId}</span></div>` : ''}
-            <div>বর্তমান অবস্থা: <b>${order.status}</b></div>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 70%;">পণ্য বিবরণ</th>
-              <th style="width: 30%; text-align: right;">পরিমাণ / মূল্য</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${order.items.replace(/,/g, '<br>')}</td>
-              <td style="text-align: right; font-weight: bold;">৳ ${Number(order.total).toLocaleString('en-BD')}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="total-box">
-          <span>মোট আদায়যোগ্য টাকা:</span>
-          <span style="font-size: 18px; color: #0891b2;">৳ ${Number(order.total).toLocaleString('en-BD')}</span>
-        </div>
-        <div class="footer">
-          কাস্টমার সাপোর্ট: 01751297055 | Khan Traders
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const htmlOutput = HtmlService.createHtmlOutput(htmlContent)
-    .setWidth(750)
-    .setHeight(650);
-
-  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'ডেলিভারি চালান / ইনভয়েস');
-}
-
-// =========================================================
-// ৭. সরাসরি পিডিএফ চালান ডাউনলোড ও ড্রাইভে সেভ ফাংশন
-// =========================================================
-function downloadInvoicePDF() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const row = sheet.getActiveRange().getRow();
-
-  if (row <= 1) {
-    SpreadsheetApp.getUi().alert('দয়া করে ২ নম্বর রো বা তার নিচের কোনো অর্ডারের সেল নির্বাচন করুন।');
-    return;
-  }
-
-  const data = sheet.getRange(row, 1, 1, 13).getValues()[0];
-
-  const order = {
-    date: data[0] ? Utilities.formatDate(new Date(data[0]), "Asia/Dhaka", "dd/MM/yyyy hh:mm a") : '',
-    orderId: data[1] || 'ORDER',
-    name: data[2] || '',
-    phone: data[3] || '',
-    address: data[4] || '',
-    thana: data[5] || '',
-    district: data[6] || '',
-    items: data[7] || '',
-    total: data[8] || 0,
-    payMethod: data[9] || 'ক্যাশ অন ডেলিভারি',
-    trxId: data[10] || 'N/A',
-    status: data[11] || 'পেন্ডিং'
-  };
-
-  const htmlBody = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; color: #1e293b; }
-        .invoice-box { border: 1px solid #cbd5e1; padding: 24px; border-radius: 8px; }
-        .company-name { font-size: 22px; font-weight: bold; color: #0891b2; margin: 0; }
-        .company-sub { font-size: 11px; color: #64748b; margin-top: 4px; line-height: 1.4; }
-        table.grid { width: 100%; margin-bottom: 20px; font-size: 12px; }
-        table.grid td { vertical-align: top; width: 50%; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
-        table.items { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-        table.items th, table.items td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
-        table.items th { background: #f1f5f9; color: #334155; }
-        .footer { margin-top: 24px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
-      </style>
-    </head>
-    <body>
-      <div class="invoice-box">
-        <table style="width: 100%; margin-bottom: 15px;">
-          <tr>
-            <td>
-              <h1 class="company-name">KHAN TRADERS</h1>
-              <div class="company-sub">স্বস্তিপুর ভাদালিয়া বাজার, কুষ্টিয়া সদর, কুষ্টিয়া<br>হটলাইন: 01751297055</div>
-            </td>
-            <td style="text-align: right;">
-              <h2 style="margin: 0; font-size: 18px; color: #0f172a;">ডেলিভারি চালান</h2>
-              <div style="font-size: 11px; color: #64748b; margin-top: 4px;">অর্ডার নং: <b>${order.orderId}</b><br>তারিখ: ${order.date}</div>
-            </td>
-          </tr>
-        </table>
-
-        <table class="grid">
-          <tr>
-            <td>
-              <b style="color: #64748b; font-size: 10px; text-transform: uppercase;">প্রাপকের বিবরণ:</b><br>
-              <b style="font-size: 13px;">${order.name}</b><br>
-              ফোন: ${order.phone}<br>
-              ঠিকানা: ${order.address}<br>
-              থানা: ${order.thana}, জেলা: ${order.district}
-            </td>
-            <td>
-              <b style="color: #64748b; font-size: 10px; text-transform: uppercase;">পেমেন্টের বিবরণ:</b><br>
-              পদ্ধতি: <b>${order.payMethod}</b><br>
-              ${order.trxId !== 'N/A' ? `TrxID: <span style="font-family: monospace; font-weight: bold;">${order.trxId}</span><br>` : ''}
-              বর্তমান অবস্থা: <b>${order.status}</b>
-            </td>
-          </tr>
-        </table>
-
-        <table class="items">
-          <thead>
-            <tr>
-              <th style="width: 70%;">পণ্য বিবরণ</th>
-              <th style="width: 30%; text-align: right;">পরিমাণ / মূল্য</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${order.items.replace(/,/g, '<br>')}</td>
-              <td style="text-align: right; font-weight: bold;">৳ ${Number(order.total).toLocaleString('en-BD')}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table style="width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; font-size: 14px; font-weight: bold;">
-          <tr>
-            <td>মোট আদায়যোগ্য টাকা:</td>
-            <td style="text-align: right; color: #0891b2; font-size: 16px;">৳ ${Number(order.total).toLocaleString('en-BD')}</td>
-          </tr>
-        </table>
-
-        <div class="footer">
-          কাস্টমার সাপোর্ট: 01751297055 | Khan Traders
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const blob = Utilities.newBlob(htmlBody, 'text/html', `Invoice_${order.orderId}.html`).getAs('application/pdf');
-  blob.setName(`Invoice_${order.orderId}.pdf`);
-
-  let folder;
-  const folders = DriveApp.getFoldersByName("Khan_Traders_Invoices");
-  if (folders.hasNext()) {
-    folder = folders.next();
-  } else {
-    folder = DriveApp.createFolder("Khan_Traders_Invoices");
-  }
-  const file = folder.createFile(blob);
-  const downloadUrl = file.getDownloadUrl();
-  const viewUrl = file.getUrl();
-
-  const downloadHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: sans-serif; text-align: center; padding: 25px; color: #1e293b; }
-        .btn { display: inline-block; padding: 10px 20px; margin: 10px 5px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
-        .btn-down { background: #0891b2; color: #ffffff; }
-        .btn-view { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
-      </style>
-    </head>
-    <body>
-      <div style="font-size: 38px; margin-bottom: 8px;">✅</div>
-      <h3 style="margin: 0 0 8px;">চালান #${order.orderId} প্রস্তুত!</h3>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">
-        চালানটি গুগল ড্রাইভে <b>"Khan_Traders_Invoices"</b> ফোল্ডারে সংরক্ষিত হয়েছে।
-      </p>
-      
-      <a href="${downloadUrl}" class="btn btn-down" target="_blank" download>📥 সরাসরি ডাউনলোড করুন</a>
-      <a href="${viewUrl}" class="btn btn-view" target="_blank">👁️ ড্রাইভে দেখুন</a>
-
-      <script>
-        window.open('${downloadUrl}', '_blank');
-      </script>
-    </body>
-    </html>
-  `;
-
-  const htmlOutput = HtmlService.createHtmlOutput(downloadHtml)
-    .setWidth(450)
-    .setHeight(250);
-
-  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'পিডিএফ চালান ডাউনলোড');
 }
