@@ -83,7 +83,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; // আপনার Google Apps Script URL এখানে বসাবেন
+    // এখানে আপনার গুগল অ্যাপস স্ক্রিপ্ট ওয়েব অ্যাপ ইউআরএলটি বসিয়ে দিন
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; 
 
     function checkPassword() {
       const pass = document.getElementById('adminPass').value;
@@ -109,11 +110,11 @@
             html += `<option value="${cat.key}" data-name="${cat.name}">${cat.name} (${cat.key})</option>`;
           });
         }
-        // সবার শেষে নতুন ক্যাটাগরি যোগ করার অপশন থাকবে
         html += `<option value="new">➕ নতুন ক্যাটাগরি যোগ করুন</option>`;
         select.innerHTML = html;
       } catch (err) {
         console.error("Category load error:", err);
+        document.getElementById('categorySelect').innerHTML = '<option value="">ক্যাটাগরি লোড করতে সমস্যা হয়েছে</option><option value="new">➕ নতুন ক্যাটাগরি যোগ করুন</option>';
       }
     }
 
